@@ -1,1 +1,208 @@
-d
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Space Factory – Planet Start</title>
+    <style>
+        body {
+            background: #080d24;
+            color: white;
+            font-family: monospace;
+            text-align: center;
+            padding: 20px;
+        }
+        .panel {
+            width: 420px;
+            margin: 20px auto;
+            padding: 20px;
+            background: rgba(255,255,255,0.07);
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+        button {
+            margin: 6px;
+            padding: 10px 20px;
+            background: #4e72ff;
+            border: 0;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #6d8aff;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🚀 SPACE FACTORY</h1>
+    <p>Build your base, manage limited resources, and unlock space exploration.</p>
+
+    <!-- PLANET SELECTION -->
+    <div class="panel" id="planetSelect">
+        <h2>Select Your Starting Planet</h2>
+        <button onclick="pickPlanet('Lunar')">🌕 Lunar Base (High ore, low metal)</button><br>
+        <button onclick="pickPlanet('Mars')">🔴 Mars Base (Balanced resources)</button><br>
+        <button onclick="pickPlanet('Europa')">🧊 Europa Base (High energy potential)</button>
+    </div>
+
+    <!-- GAME UI -->
+    <div id="gameUI" style="display:none">
+
+        <div class="panel">
+            <h2>Planet: <span id="planetName"></span></h2>
+            <p><i>Resource caps until space exploration is unlocked.</i></p>
+            <p>Ore Cap: <span id="oreCapLabel"></span></p>
+            <p>Metal Cap: <span id="metalCapLabel"></span></p>
+            <p>Energy Cap: <span id="energyCapLabel"></span></p>
+        </div>
+
+        <div class="panel">
+            <h2>Resources</h2>
+            <p>Ore: <span id="ore">0</span></p>
+            <p>Metal: <span id="metal">0</span></p>
+            <p>Energy: <span id="energy">0</span></p>
+
+            <button onclick="mineOre()">Mine Ore +1</button>
+            <button onclick="generateEnergy()">Generate Energy +1</button>
+        </div>
+
+        <div class="panel">
+            <h2>Factories</h2>
+            <p>Ore Factories: <span id="oreFactories">0</span></p>
+            <p>Metal Factories: <span id="metalFactories">0</span></p>
+
+            <button onclick="buildOreFactory()">
+                Build Ore Factory (Cost: 20 ore, 5 energy)
+            </button>
+
+            <button onclick="buildMetalFactory()">
+                Build Metal Factory (Cost: 25 ore, 10 energy)
+            </button>
+        </div>
+
+        <div class="panel">
+            <h2>🚀 Space Exploration</h2>
+            <p>Unlocks unlimited resources + new planets.</p>
+            <button onclick="unlockSpace()" id="spaceBtn">
+                Unlock Space (Cost: 500 ore, 200 metal, 150 energy)
+            </button>
+            <p id="spaceStatus">Locked ❌</p>
+        </div>
+    </div>
+
+    <script>
+        // -------------------------
+        // RESOURCE VARIABLES
+        // -------------------------
+        let ore = 0, metal = 0, energy = 0;
+        let oreFactories = 0, metalFactories = 0;
+        let spaceUnlocked = false;
+
+        // -------------------------
+        // PLANET RESOURCE CAPS
+        // -------------------------
+        const planets = {
+            Lunar:  { oreCap: 500, metalCap: 200, energyCap: 150 },
+            Mars:   { oreCap: 350, metalCap: 350, energyCap: 250 },
+            Europa: { oreCap: 200, metalCap: 300, energyCap: 500 }
+        };
+
+        let selectedPlanet = null;
+        let caps = {};
+
+        function pickPlanet(name) {
+            selectedPlanet = name;
+            caps = planets[name];
+
+            document.getElementById("planetName").innerText = name;
+            document.getElementById("oreCapLabel").innerText = caps.oreCap;
+            document.getElementById("metalCapLabel").innerText = caps.metalCap;
+            document.getElementById("energyCapLabel").innerText = caps.energyCap;
+
+            document.getElementById("planetSelect").style.display = "none";
+            document.getElementById("gameUI").style.display = "block";
+        }
+
+        // -------------------------
+        // UPDATE DISPLAY
+        // -------------------------
+        function updateUI() {
+            document.getElementById("ore").innerText = ore;
+            document.getElementById("metal").innerText = metal;
+            document.getElementById("energy").innerText = energy;
+
+            document.getElementById("oreFactories").innerText = oreFactories;
+            document.getElementById("metalFactories").innerText = metalFactories;
+        }
+
+        // -------------------------
+        // MINING + ENERGY
+        // -------------------------
+        function mineOre() {
+            if (!spaceUnlocked && ore >= caps.oreCap) return;
+            ore++;
+            updateUI();
+        }
+
+        function generateEnergy() {
+            if (!spaceUnlocked && energy >= caps.energyCap) return;
+            energy++;
+            updateUI();
+        }
+
+        // -------------------------
+        // FACTORY BUILDING
+        // -------------------------
+        function buildOreFactory() {
+            if (ore >= 20 && energy >= 5) {
+                ore -= 20;
+                energy -= 5;
+                oreFactories++;
+                updateUI();
+            }
+        }
+
+        function buildMetalFactory() {
+            if (ore >= 25 && energy >= 10) {
+                ore -= 25;
+                energy -= 10;
+                metalFactories++;
+                updateUI();
+            }
+        }
+
+        // -------------------------
+        // AUTO PRODUCTION
+        // -------------------------
+        setInterval(() => {
+            if (oreFactories > 0) {
+                if (spaceUnlocked || ore < caps.oreCap) ore += oreFactories;
+            }
+            if (metalFactories > 0) {
+                if (spaceUnlocked || metal < caps.metalCap) metal += metalFactories;
+            }
+
+            updateUI();
+        }, 1000);
+
+        // -------------------------
+        // SPACE EXPLORATION
+        // -------------------------
+        function unlockSpace() {
+            if (spaceUnlocked) return;
+
+            if (ore >= 500 && metal >= 200 && energy >= 150) {
+                ore -= 500;
+                metal -= 200;
+                energy -= 150;
+
+                spaceUnlocked = true;
+                document.getElementById("spaceStatus").innerText = "Unlocked! 🚀";
+                document.getElementById("spaceBtn").innerText = "Space Unlocked";
+                updateUI();
+            }
+        }
+    </script>
+
+</body>
+</html>
