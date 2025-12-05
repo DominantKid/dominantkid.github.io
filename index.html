@@ -274,15 +274,12 @@ button:disabled{
     z-index: 999;
 "></div>
 
-
 <div class="muted">planets owned: <span id="planetList">None</span></div>
     </div>
 
 </div>
 
-<!-- ======================
-      JAVASCRIPT
-====================== -->
+<script>
 function openResetMenu() {
   document.getElementById('resetPopup').style.display = 'block';
   document.getElementById('resetOverlay').style.display = 'block';
@@ -440,15 +437,55 @@ function addResource(key, amt){
 function renderResources(){
     const el = document.getElementById("resourcesList");
     el.innerHTML = "";
-    for(const r in state.resources){
-        const div = document.createElement("div");
-        div.className = "resource";
-        const val = Math.floor(state.resources[r]*100)/100;
-        const cap = state.storageCap[r];
-        div.innerHTML =
-            `<div class="muted">${r}</div>
-             <div><span class="stat">${val}</span> <span class="muted">/ ${cap}</span></div>`;
-        el.appendChild(div);
+
+    // Determine which resources to show:
+    // Show resource if:
+    // - amount > 0
+    // - or has a factory producing it
+    // - or it's a starting bonus resource for current planet
+
+    // Get list of produced resources by factories/structures:
+    const producedResources = new Set();
+
+    // Add resources produced by factories with count > 0
+    for(const [factory, count] of Object.entries(state.factories)){
+        if(count > 0){
+            const produces = factoryProduction[factory]?.produce;
+            if(produces){
+                for(const res in produces){
+                    producedResources.add(res);
+                }
+            }
+        }
+    }
+    // Also add resources produced by structures if any (like Shipyard, AI Lab)
+    for(const [structure, count] of Object.entries(state.structures)){
+        if(count > 0){
+            const produces = factoryProduction[structure]?.produce;
+            if(produces){
+                for(const res in produces){
+                    producedResources.add(res);
+                }
+            }
+        }
+    }
+
+    // Also include resources in starting bonus for current planet
+    const startingResources = new Set(Object.keys(planets[state.planet]?.startBonus || {}));
+
+    // Now show resources where amount>0 OR produced OR starting resource
+    for(const resource in state.resources){
+        const amount = state.resources[resource];
+        if(amount > 0 || producedResources.has(resource) || startingResources.has(resource)){
+            const div = document.createElement("div");
+            div.className = "resource";
+            const val = Math.floor(amount*100)/100;
+            const cap = state.storageCap[resource];
+            div.innerHTML =
+                `<div class="muted">${resource}</div>
+                 <div><span class="stat">${val}</span> <span class="muted">/ ${cap}</span></div>`;
+            el.appendChild(div);
+        }
     }
 }
 
@@ -461,321 +498,241 @@ function renderBuildGrid(){
         {key:'energyGen', name:'Energy Generator', desc:'Creates energy', cost:buildCosts.energyGen},
         {key:'smelter', name:'Smelter', desc:'Ore → Metal', cost:buildCosts.smelter},
         {key:'crystalExtractor', name:'Crystal Extractor', desc:'Generates crystals', cost:buildCosts.crystalExtractor},
-        {key:'circuitFoundry', name:'Circuit Foundry', desc:'Metal+Crystal → Circuits', cost:buildCosts.circuitFoundry},
+        {key:'circuitFoundry', name:'Circuit Foundry', desc:'Metal + Crystal → Circuits', cost:buildCosts.circuitFoundry},
         {key:'alloyForge', name:'Alloy Forge', desc:'Metal → Alloy', cost:buildCosts.alloyForge},
-        {key:'fuelProcessor', name:'Fuel Processor', desc:'Ore+Energy → Fuel Cells', cost:buildCosts.fuelProcessor}
+        {key:'fuelProcessor', name:'Fuel Processor', desc:'Ore + Energy → Fuel Cells', cost:buildCosts.fuelProcessor}
     ];
 
-    items.forEach(it=>{
+    items.forEach(item => {
         const div = document.createElement("div");
-        div.style.padding = "6px 0";
-        div.innerHTML =
-            `<div style="font-weight:700">${it.name} <span class="muted">x${state.factories[it.key]}</span></div>
-             <div class="muted">${it.desc}</div>
-             <div class="muted" style="font-size:13px">${renderCost(it.cost)}</div>
-             <button onclick="buildFactory('${it.key}')">Build</button>`;
+        div.style.marginBottom = "12px";
+
+        const btn = document.createElement("button");
+        btn.textContent = `Build ${item.name} (${formatCost(item.cost)})`;
+        btn.onclick = () => buildFactory(item.key, item.cost);
+        btn.disabled = !canAfford(item.cost);
+
+        div.appendChild(btn);
         grid.appendChild(div);
     });
 }
 
-function renderChains(){
-    const el = document.getElementById("chains");
-    el.innerHTML = "";
-
-    const chains = [
-        {name:'Ore → Metal (Smelter)', count:state.factories.smelter},
-        {name:'Metal → Alloy (Alloy Forge)', count:state.factories.alloyForge},
-        {name:'Metal+Crystal → Circuit (Circuit Foundry)', count:state.factories.circuitFoundry},
-        {name:'Ore+Energy → Fuel Cell (Fuel Processor)', count:state.factories.fuelProcessor},
-    ];
-
-    for(const c of chains){
-        const div = document.createElement("div");
-        div.className = "muted";
-        div.style.marginBottom = "8px";
-        div.innerHTML = `<b>${c.name}</b><br>Built: ${c.count}`;
-        el.appendChild(div);
-    }
+function formatCost(cost){
+    return Object.entries(cost).map(([k,v])=>`${v} ${k}`).join(', ');
 }
 
-function renderCrafting(){
-    const el = document.getElementById("craftingArea");
-    el.innerHTML = "";
+function renderUnlocks(){
+    document.getElementById("unlockText").textContent = state.spaceUnlocked ? "Space unlocked — explore the stars!" : "Space locked — gather resources";
+    document.getElementById("unlockSpaceBtn").disabled = state.spaceUnlocked || !canAfford(buildCosts.Spaceport);
+    document.getElementById("planetName").textContent = state.planet || "—";
+    document.getElementById("spaceState").textContent = state.spaceUnlocked ? "Unlocked" : "Locked";
+    document.getElementById("planetList").textContent = state.planetsOwned.length ? state.planetsOwned.join(", ") : "None";
 
-    const craftables = [
-        {name:'Circuit (1 metal + 1 crystal)', cost:{metal:1, crystal:1}, res:'circuit'},
-        {name:'Alloy (4 metal)', cost:{metal:4}, res:'alloy'}
-    ];
-
-    craftables.forEach(c=>{
-        const row = document.createElement("div");
-        row.style.display = "flex";
-        row.style.justifyContent = "space-between";
-        row.innerHTML =
-            `<div class="muted">${c.name}</div>
-             <button onclick="craft('${c.res}', ${JSON.stringify(c.cost)})">Craft</button>`;
-        el.appendChild(row);
-    });
-}
-
-function renderStructures(){
-    document.getElementById("shipyardCount").innerText = state.structures.shipyard;
-    document.getElementById("aiLabCount").innerText = state.structures.aiLab;
-    document.getElementById("spaceportCount").innerText = state.structures.spaceport;
-}
-
-function updateHUD(){
-    document.getElementById("planetName").innerText = state.planet || "—";
-    document.getElementById("spaceState").innerText = state.spaceUnlocked ? "Unlocked" : "Locked";
-
-    if(state.planet){
-        const caps = planets[state.planet];
-        document.getElementById("capLabels").innerText = 
-            state.spaceUnlocked ? 
-            "No caps — space unlocked" :
-            `Ore cap: ${caps.oreCap}, Metal cap: ${caps.metalCap}, Energy cap: ${caps.energyCap}`;
-    }
-
-    document.getElementById("saveStatus").innerText = 
-        state.lastSaved ? `Saved ${new Date(state.lastSaved).toLocaleTimeString()}` : "Not saved";
-
-    document.getElementById("unlockText").innerText =
-        state.spaceUnlocked ? "Space unlocked — new planets available!" : "Space locked — gather resources.";
-
-    document.getElementById("planetList").innerText =
-        state.planetsOwned.length ? state.planetsOwned.join(", ") : "Only starting planet";
+    document.getElementById("shipyardCount").textContent = state.structures.shipyard;
+    document.getElementById("aiLabCount").textContent = state.structures.aiLab;
+    document.getElementById("spaceportCount").textContent = state.structures.spaceport;
 
     document.getElementById("asteroidBtn").disabled = !state.spaceUnlocked;
-    document.getElementById("unlockSpaceBtn").disabled = state.spaceUnlocked;
 }
 
-function renderAll(){
+function manualMine(){
+    addResource("ore", 1);
     renderResources();
-    renderBuildGrid();
-    renderChains();
-    renderCrafting();
-    renderStructures();
-    updateHUD();
+}
+
+function manualEnergy(){
+    addResource("energy", 1);
+    renderResources();
+}
+
+function asteroidMine(){
+    if(state.spaceUnlocked){
+        addResource("ore", 10);
+        renderResources();
+    }
+}
+
+function expandStorage(){
+    // Simple upgrade: increase storage capacity by 500 each time
+    state.upgrades.storageLevel++;
+    const inc = 500;
+    for(const key in state.storageCap){
+        state.storageCap[key] += inc;
+    }
+    alert("Storage capacity increased!");
+    renderResources();
+}
+
+function buildFactory(key, cost){
+    if(canAfford(cost)){
+        payCost(cost);
+        state.factories[key]++;
+        renderResources();
+        renderBuildGrid();
+    } else {
+        alert("Cannot afford this factory!");
+    }
+}
+
+function attemptUnlockSpace(){
+    if(!state.spaceUnlocked && canAfford(buildCosts.Spaceport)){
+        payCost(buildCosts.Spaceport);
+        state.spaceUnlocked = true;
+        state.structures.spaceport++;
+        alert("Space unlocked! You can now access new planets.");
+        renderUnlocks();
+        renderResources();
+        renderBuildGrid();
+    }
 }
 
 /* ============================
-      ACTIONS
+      PLANET SELECTION
 ============================ */
 function startPlanet(name){
-    state = JSON.parse(JSON.stringify(initialState));
+    if(!planets[name]) return alert("Unknown planet!");
+    state = JSON.parse(JSON.stringify(initialState)); // reset state
     state.planet = name;
 
-    // starting bonus
-    const bonus = planets[name].startBonus || {};
-    for(const k in bonus) state.resources[k] = bonus[k];
-
-    state.planetsOwned = [name];
+    // Apply starting bonuses for resources
+    const startBonus = planets[name].startBonus || {};
+    for(const k in startBonus){
+        state.resources[k] = startBonus[k];
+    }
 
     document.getElementById("planetSelector").style.display = "none";
     document.getElementById("mainHUD").style.display = "block";
     document.getElementById("wrap").style.display = "flex";
 
-    renderAll();
+    renderResources();
+    renderBuildGrid();
+    renderUnlocks();
+
     save();
-}
-
-function manualMine(){ addResource('ore', 1); renderAll(); save(); }
-function manualEnergy(){ addResource('energy', 1); renderAll(); save(); }
-
-function asteroidMine(){
-    if(!state.spaceUnlocked) return;
-    const oreGain = Math.floor(Math.random()*200)+50;
-    const metalGain = Math.floor(Math.random()*60)+10;
-    addResource('ore', oreGain);
-    addResource('metal', metalGain);
-    renderAll(); save();
-}
-
-function expandStorage(){
-    const lvl = state.upgrades.storageLevel;
-    const cost = { ore:200*(lvl+1), metal:100*(lvl+1), energy:50*(lvl+1) };
-
-    if(!canAfford(cost)){ alert("Not enough resources."); return; }
-
-    payCost(cost);
-    state.upgrades.storageLevel++;
-
-    for(const r in state.storageCap){
-        state.storageCap[r] = Math.floor(state.storageCap[r] * 1.5);
-    }
-
-    renderAll();
-    save();
-}
-
-function buildFactory(key){
-    const cost = buildCosts[key];
-    if(!canAfford(cost)){ alert("Cannot afford."); return; }
-    payCost(cost);
-    state.factories[key]++;
-    renderAll(); save();
-}
-
-function build(name){
-    const cost = buildCosts[name];
-    if(!canAfford(cost)){ alert("Cannot afford."); return; }
-    payCost(cost);
-
-    if(name==="Shipyard"){
-        state.structures.shipyard++;
-    }
-    else if(name==="AI Lab"){
-        state.structures.aiLab++;
-    }
-    else if(name==="Spaceport"){
-        state.structures.spaceport++;
-        state.spaceUnlocked = true;
-        if(!state.planetsOwned.includes("Ceres")) state.planetsOwned.push("Ceres","Kepler");
-    }
-
-    renderAll();
-    save();
-}
-
-function craft(resourceKey, cost){
-    if(!canAfford(cost)){ alert("Not enough resources."); return; }
-    payCost(cost);
-    addResource(resourceKey, 1);
-    renderAll(); save();
-}
-
-function attemptUnlockSpace(){
-    if(state.spaceUnlocked){ alert("Already unlocked."); return; }
-    const cost = {ore:500, metal:200, energy:150};
-    if(!canAfford(cost)){ alert("Cannot afford."); return; }
-    payCost(cost);
-
-    state.spaceUnlocked = true;
-    state.planetsOwned.push("Ceres","Kepler");
-
-    renderAll(); save();
 }
 
 /* ============================
-      PRODUCTION LOOP
+      PRODUCTION TICK
 ============================ */
-function runFactoryProduction(key, dt){
-    const cfg = factoryProduction[key];
-    const count = state.factories[key];
-    if(count<=0) return;
+function gameTick(delta){
+    if(!state) return;
 
-    for(let i=0;i<count;i++){
-        // consumption check
-        let canRun = true;
-        if(cfg.consume){
-            for(const r in cfg.consume){
-                const need = cfg.consume[r] * dt;
-                if((state.resources[r]||0) < need){
-                    canRun = false;
-                    break;
+    // accumulate time
+    state.tickAccumulator += delta;
+
+    // production happens every 1 second
+    if(state.tickAccumulator >= 1){
+        // loop through factories
+        for(const [fac, count] of Object.entries(state.factories)){
+            if(count > 0 && factoryProduction[fac]){
+                let canProduce = true;
+                // check if have enough input resources to consume
+                const consume = factoryProduction[fac].consume || {};
+                for(const r in consume){
+                    if(state.resources[r] < consume[r]*count) {
+                        canProduce = false;
+                        break;
+                    }
+                }
+                if(canProduce){
+                    // consume inputs
+                    for(const r in consume){
+                        state.resources[r] -= consume[r]*count;
+                    }
+                    // produce outputs
+                    const produce = factoryProduction[fac].produce || {};
+                    for(const r in produce){
+                        const amt = produce[r] * count * factoryProduction[fac].perSec * state.tickAccumulator;
+                        addResource(r, amt);
+                    }
                 }
             }
         }
-        if(!canRun) continue;
 
-        // apply consumption
-        if(cfg.consume){
-            for(const r in cfg.consume){
-                const amt = cfg.consume[r] * dt;
-                state.resources[r] -= amt;
+        // also structures like Shipyard and AI Lab produce stuff
+        for(const [struct, count] of Object.entries(state.structures)){
+            if(count > 0 && factoryProduction[struct]){
+                let canProduce = true;
+                const consume = factoryProduction[struct].consume || {};
+                for(const r in consume){
+                    if(state.resources[r] < consume[r]*count) {
+                        canProduce = false;
+                        break;
+                    }
+                }
+                if(canProduce){
+                    for(const r in consume){
+                        state.resources[r] -= consume[r]*count;
+                    }
+                    const produce = factoryProduction[struct].produce || {};
+                    for(const r in produce){
+                        const amt = produce[r] * count * factoryProduction[struct].perSec * state.tickAccumulator;
+                        addResource(r, amt);
+                    }
+                }
             }
         }
 
-        // production
-        if(cfg.produce){
-            for(const r in cfg.produce){
-                const amt = cfg.produce[r] * dt;
-                addResource(r, amt);
-            }
-        }
-    }
-}
-
-let lastTime = Date.now();
-function gameLoop(){
-    const now = Date.now();
-    let dt = (now - lastTime) / 1000;
-    lastTime = now;
-    if(dt>0.25) dt = 0.25;
-
-    if(document.getElementById("autoProduce").checked){
-        runFactoryProduction("oreFactory", dt);
-        runFactoryProduction("energyGen", dt);
-        runFactoryProduction("smelter", dt);
-        runFactoryProduction("crystalExtractor", dt);
-        runFactoryProduction("circuitFoundry", dt);
-        runFactoryProduction("alloyForge", dt);
-        runFactoryProduction("fuelProcessor", dt);
-
-        // passive Europa bonus
-        if(state.planet==="Europa"){
-            addResource("crystal", 0.02 * dt);
-        }
-    }
-
-    state.tickAccumulator += dt;
-    if(state.tickAccumulator >= 0.4){
-        renderAll();
+        // reset accumulator
         state.tickAccumulator = 0;
-    }
 
-    if(!state.lastSaved || Date.now()-state.lastSaved > 10000){
+        renderResources();
+        renderBuildGrid();
+        renderUnlocks();
         save();
     }
-
-    requestAnimationFrame(gameLoop);
 }
 
 /* ============================
-      SAVE / LOAD
+      SAVE & LOAD
 ============================ */
 function save(){
-    state.lastSaved = Date.now();
+    state.lastSaved = new Date().toISOString();
     localStorage.setItem("spaceFactorySave", JSON.stringify(state));
+    document.getElementById("saveStatus").textContent = "Saved: " + new Date().toLocaleTimeString();
 }
 
 function load(){
-    try{
-        const raw = localStorage.getItem("spaceFactorySave");
-        return raw ? JSON.parse(raw) : null;
-    }catch{ return null; }
+    const saved = localStorage.getItem("spaceFactorySave");
+    if(saved){
+        try{
+            return JSON.parse(saved);
+        }catch(e){
+            return null;
+        }
+    }
+    return null;
+}
+
+/* ============================
+      MAIN LOOP
+============================ */
+let lastTime = performance.now();
+function mainLoop(time){
+    const delta = (time - lastTime)/1000;
+    lastTime = time;
+    gameTick(delta);
+    requestAnimationFrame(mainLoop);
 }
 
 /* ============================
       INIT
 ============================ */
-function init(){
+if(load()){
+    state = load();
     if(state.planet){
         document.getElementById("planetSelector").style.display = "none";
         document.getElementById("mainHUD").style.display = "block";
         document.getElementById("wrap").style.display = "flex";
+        renderResources();
+        renderBuildGrid();
+        renderUnlocks();
     }
-
-    renderAll();
-    requestAnimationFrame(gameLoop);
+} else {
+    document.getElementById("planetSelector").style.display = "block";
 }
 
-init();
-
-// Expose functions globally
-window.startPlanet = startPlanet;
-window.manualMine = manualMine;
-window.manualEnergy = manualEnergy;
-window.asteroidMine = asteroidMine;
-window.expandStorage = expandStorage;
-window.buildFactory = buildFactory;
-window.build = build;
-window.craft = craft;
-window.attemptUnlockSpace = attemptUnlockSpace;
-
-function renderCost(cost){
-    return Object.entries(cost).map(([k,v])=>`${v} ${k}`).join(" / ");
-}
+mainLoop();
 </script>
 
 </body>
