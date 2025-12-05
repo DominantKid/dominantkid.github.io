@@ -236,10 +236,46 @@ button:disabled{
         <button onclick="attemptUnlockSpace()" id="unlockSpaceBtn">
             Unlock Space (500 ore / 200 metal / 150 energy)
         </button>
-        <div class="muted" id="unlockText">Space locked — gather resources.</div>
-        <br><br>
+        <div class="muted" id="unlockText">Space locked — gather resources</div>
+<br><br>
 
-        <div class="muted">Planets owned: <span id="planetList">None</span></div>
+<!-- Reset Game Button -->
+<button class="bigbtn" onclick="openResetMenu()" style="background:#ff4d4d; margin-top: 10px;">
+  Reset Game
+</button>
+
+<!-- Reset Confirmation Popup -->
+<div id="resetPopup" style="
+    display: none; 
+    position: fixed; 
+    top: 50%; left: 50%; 
+    transform: translate(-50%, -50%);
+    background: #222;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px #ff4d4d;
+    color: white;
+    z-index: 1000;
+    text-align: center;
+    min-width: 250px;
+">
+  <p style="font-size: 1.2em; margin-bottom: 15px;">Are you sure you want to reset?</p>
+  <button onclick="resetGame()" style="margin-right: 10px; background:#ff4d4d; color:white;">Yes</button>
+  <button onclick="closeResetMenu()">No</button>
+</div>
+
+<!-- Optional: Overlay behind popup -->
+<div id="resetOverlay" style="
+    display:none;
+    position: fixed; 
+    top: 0; left: 0; 
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.6);
+    z-index: 999;
+"></div>
+
+
+<div class="muted">planets owned: <span id="planetList">None</span></div>
     </div>
 
 </div>
@@ -247,7 +283,27 @@ button:disabled{
 <!-- ======================
       JAVASCRIPT
 ====================== -->
-<script>
+function openResetMenu() {
+  document.getElementById('resetPopup').style.display = 'block';
+  document.getElementById('resetOverlay').style.display = 'block';
+}
+
+function closeResetMenu() {
+  document.getElementById('resetPopup').style.display = 'none';
+  document.getElementById('resetOverlay').style.display = 'none';
+}
+
+function resetGame() {
+  closeResetMenu();
+
+  // Put your reset logic here.
+  // For testing, let's just reload the page:
+  location.reload();
+
+  // Or if you have a reset function, call it here:
+  // resetAllGameData();
+}
+
 /* ============================
       GAME STATE
 ============================ */
