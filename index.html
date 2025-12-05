@@ -3,122 +3,57 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🌌 Space Factory</title>
+<title>🌌 Space Factory - Full Version</title>
 <style>
-:root {
-    --bg: #071028;
-    --panel: #0f1b3a;
-    --accent: #6fb3ff;
-    --muted: #9fb5d9;
-}
-
-body {
-    margin: 0;
-    font-family: monospace;
-    background: linear-gradient(180deg,var(--bg),#031026);
-    color: #eaf4ff;
-}
-
-header {
-    text-align: center;
-    padding: 20px 0 10px 0;
-}
-
-.galaxy-title {
-    font-size: clamp(28px,4vw,48px);
-    font-weight: 800;
-    background: linear-gradient(90deg,#6fb3ff,#9f70ff,#ff70d7,#6fb3ff);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: galaxyFlow 8s ease infinite;
-    text-shadow: 0 0 18px rgba(125,150,255,0.35), 0 0 35px rgba(150,90,255,0.25);
-}
-
-.galaxy-subtitle { margin-top: 6px; font-size: 15px; color: #bcd7ff; }
-
-@keyframes galaxyFlow {
-    0% {background-position:0% 50%;}
-    50% {background-position:100% 50%;}
-    100% {background-position:0% 50%;}
-}
-
-#wrap { display: flex; gap: 16px; padding: 16px; justify-content: center; flex-wrap: wrap; }
-
-.panel {
-    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-    border:1px solid rgba(255,255,255,0.04);
-    border-radius:12px;
-    padding:12px;
-    width: 340px;
-    box-shadow:0 6px 20px rgba(3,6,20,0.6);
-}
-
-.wide { width:720px; }
-
-.resource { display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px dashed rgba(255,255,255,0.03); }
-.muted { color: var(--muted); font-size:13px; }
-.stat { font-weight:700; }
-
-button {
-    background:linear-gradient(180deg,var(--accent),#4e8fe3);
-    border:none; color:#02112a; padding:8px 10px; border-radius:8px;
-    cursor:pointer; font-weight:700;
-}
-button:hover { filter: brightness(1.1); }
-button:disabled { opacity:0.45; cursor:not-allowed; }
-.bigbtn { padding:12px 14px; font-size:15px; }
-
-#resetPopup, #resetOverlay {
-    position: fixed; top:0; left:0; width:100%; height:100%;
-    display:none; justify-content:center; align-items:center;
-}
-#resetOverlay { background: rgba(0,0,0,0.6); z-index: 900; }
-#resetPopup {
-    background: #222; color:white; padding:20px; border-radius:8px;
-    box-shadow:0 0 10px #ff4d4d; z-index:1000; text-align:center;
-    min-width: 250px;
-}
+body { font-family: monospace; background: #071028; color: #eaf4ff; margin:0; padding:0; }
+header { text-align:center; padding:20px 0; }
+.galaxy-title { font-size:40px; background:linear-gradient(90deg,#6fb3ff,#9f70ff,#ff70d7,#6fb3ff); -webkit-background-clip:text; -webkit-text-fill-color:transparent; animation:flow 8s linear infinite; }
+@keyframes flow { 0%{background-position:0%} 50%{background-position:100%} 100%{background-position:0%} }
+.panel { background:#0f1b3a; padding:15px; border-radius:10px; margin:10px auto; max-width:600px; }
+button { padding:8px 12px; margin:5px; border:none; border-radius:5px; background:#6fb3ff; color:#02112a; cursor:pointer; }
+button:disabled { opacity:0.5; cursor:not-allowed; }
+#resetPopup, #resetOverlay { position:fixed; top:0; left:0; width:100%; height:100%; display:none; justify-content:center; align-items:center; }
+#resetOverlay { background: rgba(0,0,0,0.5); z-index:900; }
+#resetPopup { background:#222; padding:20px; border-radius:10px; z-index:1000; text-align:center; }
 </style>
 </head>
 <body>
 
 <header>
-    <h1 class="galaxy-title">🌌 Space Factory</h1>
-    <div class="galaxy-subtitle">Build factories, expand your colony, and explore the stars.</div>
+<h1 class="galaxy-title">🌌 Space Factory</h1>
+<div class="galaxy-subtitle">Mine, build, research, and dominate the galaxy!</div>
 </header>
 
-<!-- Planet Selector -->
-<div id="planetSelector" class="panel" style="margin:auto;margin-top:20px;width:380px;">
+<div id="planetSelector" class="panel">
     <h3>Select Starting Planet</h3>
-    <button onclick="startPlanet('Lunar')">🌕 Lunar — abundant ore, low metal</button><br><br>
-    <button onclick="startPlanet('Mars')">🔴 Mars — balanced</button><br><br>
-    <button onclick="startPlanet('Europa')">🧊 Europa — energy rich</button>
+    <button onclick="startPlanet('Lunar')">🌕 Lunar</button>
+    <button onclick="startPlanet('Mars')">🔴 Mars</button>
+    <button onclick="startPlanet('Europa')">🧊 Europa</button>
 </div>
 
-<!-- Game HUD -->
 <div id="mainHUD" style="display:none;">
-    <div class="panel wide">
+    <div class="panel">
         <h3>Resources</h3>
         <div id="resourcesList"></div>
-
-        <hr>
 
         <h3>Storage Upgrade</h3>
         <div id="storageUpgradeArea"></div>
 
-        <hr>
-
         <h3>Manual Actions</h3>
-        <button class="bigbtn" onclick="manualMine()">Mine Ore</button>
-        <button class="bigbtn" onclick="manualEnergy()">Generate Energy</button>
-        <button class="bigbtn" onclick="asteroidMine()" id="asteroidBtn" disabled>Asteroid Mine</button>
-
-        <hr>
+        <button onclick="manualMine()">Mine Ore</button>
+        <button onclick="manualEnergy()">Generate Energy</button>
 
         <h3>Factories</h3>
         <div id="buildGrid"></div>
 
-        <hr>
+        <h3>Advanced Factories</h3>
+        <div id="advancedGrid"></div>
+
+        <h3>Research & Tech</h3>
+        <div id="researchGrid"></div>
+
+        <h3>Achievements</h3>
+        <div id="achievementsList"></div>
 
         <button onclick="openResetMenu()" style="background:#ff4d4d;">Reset Game</button>
     </div>
@@ -127,7 +62,7 @@ button:disabled { opacity:0.45; cursor:not-allowed; }
 <div id="resetOverlay"></div>
 <div id="resetPopup">
     <p>Are you sure you want to reset?</p>
-    <button onclick="resetGame()" style="margin-right:10px;background:#ff4d4d;color:white;">Yes</button>
+    <button onclick="resetGame()" style="background:#ff4d4d;">Yes</button>
     <button onclick="closeResetMenu()">No</button>
 </div>
 
@@ -137,90 +72,105 @@ button:disabled { opacity:0.45; cursor:not-allowed; }
 ================================*/
 const initialState = {
     planet: null,
-    spaceUnlocked: false,
-    resources: { ore:0, metal:0, energy:0, crystal:0, alloy:0, circuit:0 },
-    storageCap: { ore:1000, metal:500, energy:500, crystal:200, alloy:200, circuit:100 },
-    factories: { oreFactory:0, energyGen:0, smelter:0 },
+    resources: { ore:0, metal:0, energy:0, alloy:0, crystal:0, circuit:0, advancedTech:0 },
+    storageCap: { ore:1000, metal:500, energy:500, alloy:100, crystal:50, circuit:20, advancedTech:5 },
+    factories: { oreFactory:0, energyGen:0, smelter:0, alloySmelter:0, crystalLab:0, circuitFab:0 },
     upgrades: { storageLevel:0 },
-    planetsOwned: [],
-    lastSaved: null,
-    tickAccumulator:0
+    research: { oreBoost:0, metalBoost:0, energyBoost:0 },
+    achievements: {},
+    lastSaved: null
 };
 let state = load() || JSON.parse(JSON.stringify(initialState));
 
 const planets = {
-    Lunar: { oreCap:500, metalCap:200, energyCap:150, startBonus:{ore:50} },
-    Mars:  { oreCap:350, metalCap:350, energyCap:250, startBonus:{metal:30} },
-    Europa:{ oreCap:200, metalCap:300, energyCap:500, startBonus:{energy:50} }
+    Lunar: { bonus:{ore:50} },
+    Mars: { bonus:{metal:50} },
+    Europa: { bonus:{energy:50} }
 };
 
+/* ===============================
+        COSTS AND PRODUCTION
+================================*/
 const buildCosts = {
     oreFactory:{ ore:20, energy:5 },
     energyGen:{ ore:10 },
-    smelter:{ ore:50, energy:10 }
+    smelter:{ ore:50, energy:10 },
+    alloySmelter:{ metal:20, energy:10 },
+    crystalLab:{ metal:50, energy:20 },
+    circuitFab:{ crystal:10, alloy:5, energy:30 }
 };
 
 const factoryProduction = {
-    oreFactory:{ produce:{ore:1}, perSec:1 },
-    energyGen:{ produce:{energy:1}, perSec:1 },
-    smelter:{ consume:{ore:3}, produce:{metal:1}, perSec:1 }
+    oreFactory:{ produce:{ore:1} },
+    energyGen:{ produce:{energy:1} },
+    smelter:{ consume:{ore:3}, produce:{metal:1} },
+    alloySmelter:{ consume:{metal:2, energy:2}, produce:{alloy:1} },
+    crystalLab:{ consume:{metal:5, energy:5}, produce:{crystal:1} },
+    circuitFab:{ consume:{crystal:2, alloy:3, energy:10}, produce:{circuit:1} }
 };
 
 /* ===============================
         HELPERS
 ================================*/
-function clampToStorage(resource, amount) {
+function clampToStorage(resource, amount){
     return Math.min(amount, state.storageCap[resource] || amount);
 }
-
 function canAfford(cost){
-    for(const k in cost) if((state.resources[k]||0) < cost[k]) return false;
+    for(const k in cost) if((state.resources[k]||0)<cost[k]) return false;
     return true;
 }
-
-function payCost(cost){ for(const k in cost) state.resources[k] -= cost[k]; }
-function addResource(key, amt){ 
-    if(state.resources[key] !== undefined){
-        state.resources[key] = clampToStorage(key, state.resources[key]+amt);
-    }
-}
+function payCost(cost){ for(const k in cost) state.resources[k]-=cost[k]; }
+function addResource(key, amt){ if(state.resources[key]!==undefined) state.resources[key]=clampToStorage(key,state.resources[key]+amt); }
 
 /* ===============================
         UI RENDER
 ================================*/
 function renderResources(){
-    const el = document.getElementById('resourcesList'); el.innerHTML='';
+    const el=document.getElementById('resourcesList'); el.innerHTML='';
     for(const r in state.resources){
-        if(state.resources[r]>0 || r==='ore' || r==='energy'){ // only show obtainable/owned
-            const div = document.createElement('div');
-            div.className='resource';
-            div.innerHTML=`<div class="muted">${r}</div><div><span class="stat">${Math.floor(state.resources[r])}</span> / ${state.storageCap[r]}</div>`;
+        if(state.resources[r]>0 || r==='ore' || r==='energy'){
+            const div=document.createElement('div');
+            div.textContent=`${r}: ${Math.floor(state.resources[r])} / ${state.storageCap[r]}`;
             el.appendChild(div);
         }
     }
 }
 
 function renderFactories(){
-    const grid = document.getElementById('buildGrid'); grid.innerHTML='';
-    for(const f in buildCosts){
-        const cost = buildCosts[f];
+    const grid=document.getElementById('buildGrid'); grid.innerHTML='';
+    const basicFactories=['oreFactory','energyGen','smelter'];
+    for(const f of basicFactories){
+        const cost=buildCosts[f];
         if(canAfford(cost)){
-            const btn = document.createElement('button');
+            const btn=document.createElement('button');
             btn.textContent=`Build ${f} (${Object.entries(cost).map(([k,v])=>v+' '+k).join('/')})`;
-            btn.onclick = ()=>{ buildFactory(f); };
+            btn.onclick=()=>{ buildFactory(f); };
+            grid.appendChild(btn);
+        }
+    }
+}
+
+function renderAdvancedFactories(){
+    const grid=document.getElementById('advancedGrid'); grid.innerHTML='';
+    const advanced=['alloySmelter','crystalLab','circuitFab'];
+    for(const f of advanced){
+        const cost=buildCosts[f];
+        if(canAfford(cost)){
+            const btn=document.createElement('button');
+            btn.textContent=`Build ${f} (${Object.entries(cost).map(([k,v])=>v+' '+k).join('/')})`;
+            btn.onclick=()=>{ buildFactory(f); };
             grid.appendChild(btn);
         }
     }
 }
 
 function renderStorageUpgrade(){
-    const area = document.getElementById('storageUpgradeArea'); area.innerHTML='';
-    const level = state.upgrades.storageLevel;
-    const cost = { ore:200*(level+1), metal:100*(level+1), energy:50*(level+1) };
+    const area=document.getElementById('storageUpgradeArea'); area.innerHTML='';
+    const lvl=state.upgrades.storageLevel;
+    const cost={ ore:200*(lvl+1), metal:100*(lvl+1), energy:50*(lvl+1) };
     if(canAfford(cost)){
-        const btn = document.createElement('button');
-        btn.textContent=`Upgrade Storage (Level ${level+1}): ${Object.entries(cost).map(([k,v])=>v+' '+k).join('/')}`;
-        btn.className='bigbtn';
+        const btn=document.createElement('button');
+        btn.textContent=`Upgrade Storage (Level ${lvl+1}) - Cost: ${Object.entries(cost).map(([k,v])=>v+' '+k).join('/')}`;
         btn.onclick=()=>upgradeStorage();
         area.appendChild(btn);
     } else {
@@ -232,11 +182,10 @@ function renderStorageUpgrade(){
         ACTIONS
 ================================*/
 function startPlanet(name){
-    state = JSON.parse(JSON.stringify(initialState));
-    state.planet = name;
-    const bonus = planets[name].startBonus||{};
+    state=JSON.parse(JSON.stringify(initialState));
+    state.planet=name;
+    const bonus=planets[name].bonus||{};
     for(const k in bonus) state.resources[k]=bonus[k];
-    state.planetsOwned=[name];
     document.getElementById('planetSelector').style.display='none';
     document.getElementById('mainHUD').style.display='block';
     renderAll();
@@ -246,28 +195,24 @@ function startPlanet(name){
 function manualMine(){ addResource('ore',1); renderAll(); save(); }
 function manualEnergy(){ addResource('energy',1); renderAll(); save(); }
 
-function asteroidMine(){
-    if(!state.spaceUnlocked) return;
-    addResource('ore',Math.floor(Math.random()*200)+50);
-    addResource('metal',Math.floor(Math.random()*50)+10);
-    renderAll(); save();
-}
-
 function buildFactory(key){
-    const cost = buildCosts[key];
+    const cost=buildCosts[key];
     if(!canAfford(cost)){ alert("Cannot afford."); return; }
     payCost(cost);
     state.factories[key]++;
-    renderAll(); save();
+    renderAll();
+    save();
 }
 
 function upgradeStorage(){
-    const lvl = state.upgrades.storageLevel;
-    const cost = { ore:200*(lvl+1), metal:100*(lvl+1), energy:50*(lvl+1) };
+    const lvl=state.upgrades.storageLevel;
+    const cost={ ore:200*(lvl+1), metal:100*(lvl+1), energy:50*(lvl+1) };
     if(!canAfford(cost)){ alert("Cannot afford."); return; }
-    payCost(cost); state.upgrades.storageLevel++;
+    payCost(cost);
+    state.upgrades.storageLevel++;
     for(const r in state.storageCap) state.storageCap[r]=Math.floor(state.storageCap[r]*1.5);
-    renderAll(); save();
+    renderAll();
+    save();
 }
 
 /* ===============================
@@ -275,33 +220,31 @@ function upgradeStorage(){
 ================================*/
 function openResetMenu(){ document.getElementById('resetPopup').style.display='flex'; document.getElementById('resetOverlay').style.display='flex'; }
 function closeResetMenu(){ document.getElementById('resetPopup').style.display='none'; document.getElementById('resetOverlay').style.display='none'; }
-function resetGame(){ closeResetMenu(); state = JSON.parse(JSON.stringify(initialState)); save(); location.reload(); }
+function resetGame(){ closeResetMenu(); state=JSON.parse(JSON.stringify(initialState)); save(); location.reload(); }
 
 /* ===============================
         PRODUCTION LOOP
 ================================*/
 function runProduction(dt){
     for(const key in factoryProduction){
-        const cfg = factoryProduction[key];
-        const count = state.factories[key];
+        const cfg=factoryProduction[key];
+        const count=state.factories[key];
         if(count<=0) continue;
         let canRun=true;
         if(cfg.consume) for(const r in cfg.consume) if((state.resources[r]||0)<cfg.consume[r]*dt) canRun=false;
         if(!canRun) continue;
         if(cfg.consume) for(const r in cfg.consume) state.resources[r]-=cfg.consume[r]*dt;
-        if(cfg.produce) for(const r in cfg.produce) addResource(r,cfg.produce[r]*dt);
+        if(cfg.produce) for(const r in cfg.produce) for(const r2 in cfg.produce) addResource(r2, cfg.produce[r2]*dt*count);
     }
 }
 
-let lastTime = Date.now();
+let lastTime=Date.now();
 function gameLoop(){
-    const now = Date.now();
+    const now=Date.now();
     let dt=(now-lastTime)/1000; lastTime=now;
     if(dt>0.25) dt=0.25;
     runProduction(dt);
-    state.tickAccumulator+=dt;
-    if(state.tickAccumulator>0.4){ renderAll(); state.tickAccumulator=0; }
-    if(!state.lastSaved || Date.now()-state.lastSaved>10000) save();
+    renderAll();
     requestAnimationFrame(gameLoop);
 }
 
@@ -314,13 +257,19 @@ function load(){ try{ const raw=localStorage.getItem('spaceFactorySave'); return
 /* ===============================
         RENDER ALL
 ================================*/
-function renderAll(){ renderResources(); renderFactories(); renderStorageUpgrade(); document.getElementById('asteroidBtn').disabled=!state.spaceUnlocked; }
+function renderAll(){ 
+    renderResources(); 
+    renderFactories(); 
+    renderAdvancedFactories(); 
+    renderStorageUpgrade(); 
+}
 
 /* ===============================
         INIT
 ================================*/
 if(state.planet){ document.getElementById('planetSelector').style.display='none'; document.getElementById('mainHUD').style.display='block'; }
-renderAll(); gameLoop();
+renderAll(); 
+gameLoop();
 </script>
 </body>
 </html>
