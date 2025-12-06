@@ -12,62 +12,18 @@
     --muted: #9fb5d9;
     --glass: rgba(255,255,255,0.04);
 }
-html, body {
-    margin: 0;
-    height: 100%;
-    background: linear-gradient(180deg,var(--bg),#031026);
-    color: #eaf4ff;
-    font-family: Inter, monospace;
-}
-.galaxy-header {
-    padding: 28px 0 10px 0;
-    text-align: center;
-}
-.galaxy-title {
-    font-size: clamp(28px,4vw,48px);
-    font-weight: 800;
-    background: linear-gradient(90deg, #6fb3ff, #9f70ff, #ff70d7, #6fb3ff);
-    background-size: 300% 300%;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: galaxyFlow 8s ease infinite;
-    text-shadow: 0 0 18px rgba(125,150,255,0.35),0 0 35px rgba(150,90,255,0.25);
-    margin:0;
-}
-.galaxy-subtitle {
-    margin-top: 6px;
-    font-size: 15px;
-    color: #bcd7ff;
-}
-@keyframes galaxyFlow {
-    0% { background-position:0% 50%; }
-    50% { background-position:100% 50%; }
-    100% { background-position:0% 50%; }
-}
-#wrap {
-    display:flex; gap:16px; padding:16px; justify-content:center; flex-wrap:wrap;
-}
-.panel{
-    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-    border:1px solid rgba(255,255,255,0.04);
-    border-radius:12px;
-    padding:12px;
-    width:340px;
-    box-shadow:0 6px 20px rgba(3,6,20,0.6);
-}
+html, body { margin:0; height:100%; background:var(--bg); color:#eaf4ff; font-family: Inter, monospace;}
+.galaxy-header { text-align:center; padding:20px 0; }
+.galaxy-title { font-size:3em; font-weight:800; background:linear-gradient(90deg,#6fb3ff,#9f70ff,#ff70d7,#6fb3ff); background-clip:text; -webkit-background-clip:text; -webkit-text-fill-color:transparent; animation: flow 8s ease infinite; margin:0;}
+.galaxy-subtitle { font-size:16px; color:#bcd7ff; margin-top:5px; }
+@keyframes flow {0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+#wrap {display:flex; gap:16px; padding:16px; justify-content:center; flex-wrap:wrap;}
+.panel { background:var(--panel); border-radius:12px; padding:12px; width:340px; box-shadow:0 6px 20px rgba(0,0,0,0.6);}
 .wide{ width:720px; }
 .resource{ display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px dashed rgba(255,255,255,0.03); }
 .muted{ color:var(--muted); font-size:13px; }
 .stat{ font-weight:700; }
-button{
-    background: linear-gradient(180deg,var(--accent),#4e8fe3);
-    border:none;
-    color:#02112a;
-    padding:8px 10px;
-    border-radius:8px;
-    cursor:pointer;
-    font-weight:700;
-}
+button{ background: linear-gradient(180deg,var(--accent),#4e8fe3); border:none; color:#02112a; padding:8px 10px; border-radius:8px; cursor:pointer; font-weight:700; margin:3px 0; width:100%; }
 button:hover{ filter: brightness(1.1); }
 button:disabled{ opacity:0.45; cursor:not-allowed; }
 .bigbtn{ padding:12px 14px; font-size:15px; }
@@ -82,8 +38,8 @@ button:disabled{ opacity:0.45; cursor:not-allowed; }
 
 <div id="planetSelector" class="panel" style="margin:auto;margin-top:20px;width:380px;">
 <h3>Select Starting Planet</h3>
-<button onclick="startPlanet('Lunar')">🌕 Lunar — ore rich</button><br><br>
-<button onclick="startPlanet('Mars')">🔴 Mars — balanced</button><br><br>
+<button onclick="startPlanet('Lunar')">🌕 Lunar — ore rich</button><br>
+<button onclick="startPlanet('Mars')">🔴 Mars — balanced</button><br>
 <button onclick="startPlanet('Europa')">🧊 Europa — energy rich</button>
 <div class="muted" style="margin-top:10px;">More planets unlock later.</div>
 </div>
@@ -91,7 +47,7 @@ button:disabled{ opacity:0.45; cursor:not-allowed; }
 <div id="mainHUD" style="display:none;">
 <div class="muted">Planet: <span id="planetName">—</span></div>
 <div class="muted">Space: <span id="spaceState">Locked</span></div>
-<div class="save-indicator" id="saveStatus">Not saved</div>
+<div class="muted" id="saveStatus">Not saved</div>
 </div>
 
 <div id="wrap" style="display:none;">
@@ -110,7 +66,6 @@ button:disabled{ opacity:0.45; cursor:not-allowed; }
         <hr>
         <h3>Factories</h3>
         <div id="buildGrid"></div>
-        <div id="advancedGrid"></div>
     </div>
 
     <div class="panel">
@@ -120,7 +75,7 @@ button:disabled{ opacity:0.45; cursor:not-allowed; }
         <div class="muted">Spaceport: <span id="spaceportCount">0</span></div>
         <br>
         <button onclick="buildStructure('Spaceport')" id="unlockSpaceBtn">
-            Unlock Space (500 ore / 200 metal / 150 energy)
+            Unlock Space (500 Ore / 200 Metal / 150 Energy)
         </button>
         <div class="muted" id="unlockText">Space locked — gather resources.</div>
         <br><br>
@@ -175,8 +130,9 @@ function canAfford(cost){
 }
 function payCost(cost){ for(const r in cost) state.resources[r]-=cost[r]; }
 function addResource(r,a){ state.resources[r]=(state.resources[r]||0)+a; if(state.resources[r]>state.storageCap[r]) state.resources[r]=state.storageCap[r]; }
-function save(){ state.lastSaved=Date.now(); localStorage.setItem("spaceFactorySave",JSON.stringify(state)); }
+function save(){ state.lastSaved=Date.now(); localStorage.setItem("spaceFactorySave",JSON.stringify(state)); document.getElementById("saveStatus").innerText="Saved"; }
 function load(){ try{ const raw=localStorage.getItem("spaceFactorySave"); return raw?JSON.parse(raw):null;}catch{return null;} }
+function formatNum(n){ return Math.floor(n); } // round numbers
 
 // =====================
 // UI Rendering
@@ -185,7 +141,7 @@ function renderResources(){
     const el=document.getElementById("resourcesList"); el.innerHTML="";
     for(const r in state.resources){
         if(state.resources[r]>0||r==="ore"||r==="energy"){ // show only obtainable
-            const val=state.resources[r]; const cap=state.storageCap[r];
+            const val=formatNum(state.resources[r]); const cap=formatNum(state.storageCap[r]);
             const div=document.createElement("div");
             div.className="resource";
             div.innerHTML=`<div class="muted">${r}</div><div><span class="stat">${val}</span> / ${cap}</div>`;
@@ -248,10 +204,22 @@ function buildFactory(key){
 }
 function upgradeStorage(){
     const cost={ ore:200*(state.storageLevel+1), metal:100*(state.storageLevel+1), energy:50*(state.storageLevel+1) };
-    if(canAfford(cost)){ payCost(cost); state.storageLevel++; for(const r in state.storageCap) state.storageCap[r]=Math.floor(state.storageCap[r]*1.5); renderAll(); save(); }
+    if(canAfford(cost)){
+        payCost(cost); 
+        state.storageLevel++; 
+        for(const r in state.storageCap) state.storageCap[r]=Math.floor(state.storageCap[r]*1.5);
+        renderAll(); save();
+    }
 }
 function buildStructure(name){
-    if(name==="Spaceport"){ const cost={ore:500,metal:200,energy:150}; if(!canAfford(cost)) return; payCost(cost); state.structures.spaceport++; state.spaceUnlocked=true; renderAll(); save(); }
+    if(name==="Spaceport"){ 
+        const cost={ore:500,metal:200,energy:150}; 
+        if(!canAfford(cost)) return; 
+        payCost(cost); 
+        state.structures.spaceport++; 
+        state.spaceUnlocked=true; 
+        renderAll(); save(); 
+    }
 }
 
 // =====================
@@ -286,7 +254,7 @@ function gameLoop(){
     autoProduce(dt);
     state.tickAccumulator+=dt;
     if(state.tickAccumulator>0.4){ renderAll(); state.tickAccumulator=0; }
-    if(!state.lastSaved||Date.now()-state.lastSaved>10000) save();
+    if(!state.lastSaved||Date.now()-state.lastSaved>5000) save();
     requestAnimationFrame(gameLoop);
 }
 
