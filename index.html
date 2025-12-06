@@ -777,6 +777,125 @@ renderTabs();
 switchTab('Overview');
 renderResearch();
 styleButtons();
+// ============================
+// FIX FACTORY PRODUCTION LOOP
+// ============================
+if(state.autoProduction === undefined) state.autoProduction = false;
+
+function runFactoryProduction(key, dt){
+    const cfg = factoryProduction[key];
+    const count = state.factories[key] || 0;
+    if(count <= 0) return;
+
+    for(let i=0;i<count;i++){
+        let canRun = true;
+        if(cfg.consume){
+            for(const r in cfg.consume){
+                const need = cfg.consume[r] * dt;
+                if((state.resources[r]||0) < need){
+                    canRun = false;
+                    break;
+                }
+            }
+        }
+        if(!canRun) continue;
+
+        // Apply consumption
+        if(cfg.consume){
+            for(const r in cfg.consume){
+                const amt = cfg.consume[r] * dt;
+                state.resources[r] -= amt;
+            }
+        }
+
+        // Apply production
+        if(cfg.produce){
+            for(const r in cfg.produce){
+                const amt = cfg.produce[r] * dt * (state.research.efficiency?1.2:1);
+                addResource(r, amt);
+            }
+        }
+    }
+}
+
+let lastTime = Date.now();
+function gameLoop(){
+    const now = Date.now();
+    let dt = (now - lastTime)/1000;
+    lastTime = now;
+    if(dt>0.25) dt = 0.25;
+
+    if(state.autoProduction || state.research.automation){
+        for(const key in factoryProduction){
+            runFactoryProduction(key, dt);
+        }
+
+        // Europa passive bonus
+        if(state.planet === 'Europa'){
+            addResource('crystal', 0.02 * dt);
+        }
+    }
+
+    // Update UI every 0.4s
+    state.tickAccumulator = (state.tickAccumulator || 0) + dt;
+    if(state.tickAccumulator >= 0.4){
+        renderAll();
+        renderResearch();
+        state.tickAccumulator = 0;
+    }
+
+    // Auto-save every 10 seconds
+    if(!state.lastSaved || Date.now()-state.lastSaved > 10000){
+        save();
+    }
+
+    requestAnimationFrame(gameLoop);
+}
+
+// Start the loop
+requestAnimationFrame(gameLoop);
+// ============================
+// RENDER BUILD GRID WITH AFFORDABILITY CHECK
+// ============================
+function renderBuildGrid(){
+    const grid = document.getElementById("buildGrid");
+    grid.innerHTML = "";
+
+    const items = [
+        {key:'oreFactory', name:'Ore Mine', desc:'Extracts raw ore', cost:buildCosts.oreFactory},
+        {key:'energyGen', name:'Solar Plant', desc:'Generates energy', cost:buildCosts.energyGen},
+        {key:'smelter', name:'Smelter', desc:'Ore → Metal', cost:buildCosts.smelter},
+        {key:'crystalExtractor', name:'Crystal Extractor', desc:'Extracts crystals', cost:buildCosts.crystalExtractor},
+        {key:'circuitFoundry', name:'Circuit Foundry', desc:'Metal+Crystal → Circuits', cost:buildCosts.circuitFoundry},
+        {key:'alloyForge', name:'Alloy Forge', desc:'Metal → Alloy', cost:buildCosts.alloyForge},
+        {key:'fuelProcessor', name:'Fuel Processor', desc:'Ore+Energy → Fuel Cells', cost:buildCosts.fuelProcessor}
+    ];
+
+    items.forEach(it => {
+        const div = document.createElement("div");
+        div.style.padding = "6px 0";
+
+        const canBuy = canAfford(it.cost);
+
+        div.innerHTML = `
+            <div style="font-weight:700">${it.name} <span class="muted">x${state.factories[it.key]}</span></div>
+            <div class="muted">${it.desc}</div>
+            <div class="muted" style="font-size:13px">${renderCost(it.cost)}</div>
+            <button ${canBuy ? '' : 'disabled'} onclick="buildFactory('${it.key}')">
+                Build
+            </button>
+        `;
+        grid.appendChild(div);
+    });
+}
+
+// Helper: check if cost is affordable
+function canAfford(cost){
+    for(const key in cost){
+        if((state.resources[key]||0) < cost[key]) return false;
+    }
+    return true;
+}
 
 </script>
 </body>
