@@ -3,334 +3,781 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🌌 Space Company Clone</title>
+<title>Galaxy Industry</title>
+
 <style>
-:root{
-    --bg:#071028; --panel:#0f1b3a; --accent:#6fb3ff; --muted:#9fb5d9; --glass:rgba(255,255,255,0.04);
+:root {
+    --bg: #071028;
+    --panel: #0f1b3a;
+    --accent: #6fb3ff;
+    --muted: #9fb5d9;
+    --glass: rgba(255,255,255,0.04);
 }
-body{margin:0;font-family:Inter, monospace;background:var(--bg);color:#eaf4ff;}
-.galaxy-header{text-align:center;padding:20px;}
-.galaxy-title{font-size:3em;font-weight:800;background:linear-gradient(90deg,#6fb3ff,#9f70ff,#ff70d7,#6fb3ff);background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:flow 8s ease infinite;margin:0;}
-.galaxy-subtitle{font-size:16px;color:#bcd7ff;margin-top:5px;}
-@keyframes flow{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
-#main{display:flex;justify-content:center;flex-wrap:wrap;padding:16px;gap:16px;}
-.panel{background:var(--panel);border-radius:12px;padding:12px;width:340px;box-shadow:0 6px 20px rgba(0,0,0,0.6);}
-.wide{width:720px;}
-.tabs{display:flex;gap:5px;margin-bottom:10px;}
-.tab{flex:1;padding:6px;background:var(--glass);border-radius:6px;text-align:center;cursor:pointer;}
-.tab.active{background:var(--accent);color:#02112a;font-weight:700;}
-.resource{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed rgba(255,255,255,0.03);}
-.muted{color:var(--muted);font-size:13px;}
-.stat{font-weight:700;}
-button{background:linear-gradient(180deg,var(--accent),#4e8fe3);border:none;color:#02112a;padding:8px 10px;border-radius:8px;cursor:pointer;font-weight:700;margin:3px 0;width:100%;}
-button:hover{filter:brightness(1.1);}
-button:disabled{opacity:0.45;cursor:not-allowed;}
-.bigbtn{padding:12px 14px;font-size:15px;}
+
+/* -----------------------
+   Global Styles
+------------------------ */
+html, body {
+    height: 100%;
+    margin: 0;
+    background: linear-gradient(180deg, var(--bg), #031026);
+    font-family: Inter, system-ui, monospace;
+    color: #eaf4ff;
+}
+
+h1, h2, h3 {
+    margin: 0;
+}
+
+/* -----------------------
+   Galaxy Header
+------------------------ */
+.galaxy-header {
+    padding: 28px 0 10px 0;
+    text-align: center;
+}
+
+.galaxy-title {
+    font-size: clamp(28px, 4vw, 48px);
+    font-weight: 800;
+    background: linear-gradient(90deg, #6fb3ff, #9f70ff, #ff70d7, #6fb3ff);
+    background-size: 300% 300%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: galaxyFlow 8s ease infinite;
+    text-shadow: 0 0 18px rgba(125,150,255,0.35), 0 0 35px rgba(150,90,255,0.25);
+}
+
+.galaxy-subtitle {
+    margin-top: 6px;
+    font-size: 15px;
+    color: #bcd7ff;
+    letter-spacing: 0.4px;
+}
+
+@keyframes galaxyFlow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* -----------------------
+   Layout Panels
+------------------------ */
+#tabs {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.tab-btn {
+    background: linear-gradient(180deg, var(--accent), #4e8fe3);
+    border: none;
+    color: #02112a;
+    padding: 10px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 700;
+}
+.tab-btn.active {
+    box-shadow: 0 0 15px rgba(111,179,255,0.6);
+}
+
+.tab-content {
+    display: none;
+    padding: 12px;
+    margin: 12px auto;
+    max-width: 1200px;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.panel {
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border: 1px solid rgba(255,255,255,0.04);
+    border-radius: 12px;
+    padding: 12px;
+    box-shadow: 0 6px 20px rgba(3,6,20,0.6);
+    margin-bottom: 16px;
+}
+
+button {
+    background: linear-gradient(180deg, var(--accent), #4e8fe3);
+    border: none;
+    color: #02112a;
+    padding: 8px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 700;
+}
+button:hover { filter: brightness(1.1); }
+button:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* Resource list */
+.resource {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 1px dashed rgba(255,255,255,0.03);
+}
+
+/* -----------------------
+   Save Indicator
+------------------------ */
+.save-indicator {
+    font-size: 12px;
+    color: var(--muted);
+}
+
+/* -----------------------
+   Overlays
+------------------------ */
+#resetOverlay {
+    display:none;
+    position: fixed; 
+    top:0; left:0;
+    width:100%; height:100%;
+    background: rgba(0,0,0,0.6);
+    z-index: 999;
+}
+#resetPopup {
+    display:none;
+    position: fixed;
+    top:50%; left:50%;
+    transform: translate(-50%,-50%);
+    background:#222;
+    padding:20px;
+    border-radius:8px;
+    box-shadow:0 0 10px #ff4d4d;
+    color:white;
+    z-index:1000;
+    text-align:center;
+    min-width:250px;
+}
 </style>
 </head>
 <body>
 
+<!-- HEADER -->
 <header class="galaxy-header">
-<h1 class="galaxy-title">🌌 Space Company</h1>
-<div class="galaxy-subtitle">Build factories, harvest resources, research tech, and send missions!</div>
+    <h1 class="galaxy-title">🌌 Space Company Clone</h1>
+    <div class="galaxy-subtitle">Build your interstellar empire, manage resources, and explore space!</div>
 </header>
 
-<div id="planetSelector" class="panel" style="margin:auto;margin-top:20px;width:380px;">
-<h3>Select Starting Planet</h3>
-<button onclick="startPlanet('Lunar')">🌕 Lunar — Ore Rich</button><br>
-<button onclick="startPlanet('Mars')">🔴 Mars — Balanced</button><br>
-<button onclick="startPlanet('Europa')">🧊 Europa — Energy Rich</button>
-<div class="muted" style="margin-top:10px;">Planets unlock more resources later.</div>
+<!-- TABS -->
+<div id="tabs">
+    <button class="tab-btn active" data-tab="overview">Overview</button>
+    <button class="tab-btn" data-tab="factories">Factories</button>
+    <button class="tab-btn" data-tab="research">Research</button>
 </div>
 
-<div id="mainHUD" style="display:none; text-align:center; margin-bottom:10px;">
-<div class="muted">Planet: <span id="planetName">—</span></div>
-<div class="muted">Space: <span id="spaceState">Locked</span></div>
-<div class="muted" id="saveStatus">Not saved</div>
-</div>
-
-<div id="main" style="display:none;">
-    <div class="panel wide">
-        <div class="tabs">
-            <div class="tab active" onclick="switchTab('resourcesTab')">Resources</div>
-            <div class="tab" onclick="switchTab('factoriesTab')">Factories</div>
-            <div class="tab" onclick="switchTab('researchTab')">Research</div>
-            <div class="tab" onclick="switchTab('missionsTab')">Missions</div>
-        </div>
-
-        <div id="resourcesTab">
-            <h3>Resources</h3>
-            <div id="resourcesList"></div>
-            <hr>
-            <h3>Manual Actions</h3>
-            <button class="bigbtn" onclick="manualMine()">Mine Ore</button>
-            <button class="bigbtn" onclick="manualEnergy()">Harvest Energy</button>
-            <hr>
-            <h3>Storage</h3>
-            <button class="bigbtn" id="storageBtn" onclick="upgradeStorage()">Expand Storage</button>
-        </div>
-
-        <div id="factoriesTab" style="display:none;">
-            <h3>Factories</h3>
-            <div id="factoryGrid"></div>
-        </div>
-
-        <div id="researchTab" style="display:none;">
-            <h3>Research</h3>
-            <div id="researchGrid"></div>
-        </div>
-
-        <div id="missionsTab" style="display:none;">
-            <h3>Space Missions</h3>
-            <div id="missionsGrid"></div>
-        </div>
-    </div>
-
+<!-- TAB CONTENTS -->
+<div id="overview" class="tab-content active">
     <div class="panel">
-        <h3>Structures</h3>
-        <div class="muted">Shipyard: <span id="shipyardCount">0</span></div>
-        <div class="muted">AI Lab: <span id="aiLabCount">0</span></div>
-        <div class="muted">Spaceport: <span id="spaceportCount">0</span></div>
-        <br>
-        <button onclick="buildSpaceport()" id="unlockSpaceBtn">
-            Unlock Space (500 Ore / 200 Metal / 150 Energy)
-        </button>
-        <div class="muted" id="unlockText">Space locked — gather resources.</div>
-        <br><br>
-        <button class="bigbtn" style="background:#ff4d4d;" onclick="openResetMenu()">Reset Game</button>
+        <h3>Resources</h3>
+        <div id="resourcesList"></div>
+    </div>
+    <div class="panel">
+        <h3>Actions</h3>
+        <button onclick="collect('ore')">Collect Ore</button>
+        <button onclick="collect('energy')">Generate Energy</button>
     </div>
 </div>
 
-<div id="resetPopup" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#222;padding:20px;border-radius:8px;box-shadow:0 0 10px #ff4d4d;color:white;z-index:1000;text-align:center;min-width:250px;">
-<p style="font-size:1.2em;margin-bottom:15px;">Are you sure you want to reset?</p>
-<button onclick="resetGame()" style="margin-right:10px;background:#ff4d4d;color:white;">Yes</button>
-<button onclick="closeResetMenu()">No</button>
+<div id="factories" class="tab-content">
+    <div class="panel">
+        <h3>Factory List</h3>
+        <div id="factoryGrid"></div>
+    </div>
 </div>
-<div id="resetOverlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:999;"></div>
+
+<div id="research" class="tab-content">
+    <div class="panel">
+        <h3>Research Lab</h3>
+        <div id="researchList"></div>
+    </div>
+</div>
+
+<!-- Reset Confirmation -->
+<div id="resetOverlay"></div>
+<div id="resetPopup">
+    <p>Are you sure you want to reset the game?</p>
+    <button onclick="resetGame()">Yes</button>
+    <button onclick="closeResetMenu()">No</button>
+</div>
+
+<div style="text-align:center; margin-top:10px;">
+    <span class="save-indicator" id="saveStatus">Not saved</span>
+</div>
 
 <script>
-// =====================
-// Game State
-// =====================
-const initialState={
-    planet:null,
-    spaceUnlocked:false,
-    resources:{ore:0,energy:0,metal:0,crystal:0,alloy:0,circuit:0},
-    storage:{ore:1000,energy:500,metal:500,crystal:200,alloy:200,circuit:100},
-    storageLevel:0,
-    factories:{miner:0,solar:0,refiner:0,alloySynth:0,crystalForge:0,techFab:0},
-    structures:{shipyard:0,aiLab:0,spaceport:0},
-    research:{solarEfficiency:0,alloyTech:0,crystalTech:0},
-    lastSaved:null,
-    missions:{}
-};
-let state=load()||JSON.parse(JSON.stringify(initialState));
-
-// =====================
-// Factories
-// =====================
-const factoryDefs={
-    miner:{name:"Astro Miner",cost:{ore:10},produce:{ore:1}},
-    solar:{name:"Solar Harvester",cost:{ore:5},produce:{energy:1}},
-    refiner:{name:"Metal Refiner",cost:{ore:20,energy:5},consume:{ore:3},produce:{metal:1}},
-    alloySynth:{name:"Alloy Synthesizer",cost:{metal:10,energy:5},consume:{metal:2,energy:2},produce:{alloy:1}},
-    crystalForge:{name:"Crystal Forge",cost:{metal:30,energy:10},consume:{metal:5,energy:5},produce:{crystal:1}},
-    techFab:{name:"Tech Fabricator",cost:{crystal:5,alloy:2,energy:10},consume:{crystal:1,alloy:1,energy:5},produce:{circuit:1}}
+// ============================
+// GAME STATE
+// ============================
+const initialState = {
+    resources: { ore:0, metal:0, energy:0, crystal:0, alloy:0 },
+    storage: { ore:1000, metal:500, energy:500, crystal:200, alloy:200 },
+    factories: { mine:0, generator:0, smelter:0, crystalLab:0, alloyForge:0 },
+    research: { autoMine:false, autoEnergy:false },
+    lastSaved: null,
 };
 
-// =====================
-// Research
-// =====================
-const researchDefs={
-    solarEfficiency:{name:"Solar Efficiency",cost:{energy:100,ore:50},effect:"Increase energy production"},
-    alloyTech:{name:"Advanced Alloys",cost:{metal:200,energy:100},effect:"Increase alloy production"},
-    crystalTech:{name:"Crystal Growth",cost:{crystal:50,energy:50},effect:"Increase crystal production"}
-};
+let state = load() || JSON.parse(JSON.stringify(initialState));
 
-// =====================
-// Missions
-// =====================
-const missionDefs={
-    asteroid:{name:"Asteroid Mining",duration:10,cost:{energy:50},reward:{ore:200,metal:50}},
-    satellite:{name:"Deploy Satellite",duration:20,cost:{metal:50,energy:50},reward:{crystal:20,alloy:10}},
-    expedition:{name:"Deep Space Expedition",duration:30,cost:{energy:100,metal:100},reward:{circuit:10,crystal:50,alloy:30}}
-};
+// ============================
+// TAB FUNCTIONALITY
+// ============================
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+        document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        const tab = btn.dataset.tab;
+        document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+        document.getElementById(tab).classList.add('active');
+    });
+});
 
-// =====================
-// Helpers
-// =====================
-function canAfford(cost){for(const r in cost) if((state.resources[r]||0)<cost[r]) return false; return true;}
-function payCost(cost){for(const r in cost) state.resources[r]-=cost[r];}
-function addResource(r,a){state.resources[r]=(state.resources[r]||0)+a;if(state.resources[r]>state.storage[r]) state.resources[r]=state.storage[r];}
-function save(){state.lastSaved=Date.now();localStorage.setItem("spaceSave",JSON.stringify(state));document.getElementById("saveStatus").innerText="Saved";}
-function load(){try{const raw=localStorage.getItem("spaceSave");return raw?JSON.parse(raw):null;}catch{return null;}}
-function formatNum(n){return Math.floor(n);}
+// ============================
+// RESOURCE LOGIC
+// ============================
+function collect(resource){
+    let amount = 1;
+    if(resource==='ore') state.resources.ore += amount;
+    if(resource==='energy') state.resources.energy += amount;
+    renderResources();
+    save();
+}
 
-// =====================
-// UI Rendering
-// =====================
+function addResource(resource, amount){
+    if(state.resources[resource]===undefined) return;
+    state.resources[resource] = Math.min(state.resources[resource]+amount, state.storage[resource]);
+}
+
+// ============================
+// RENDER FUNCTIONS
+// ============================
 function renderResources(){
-    const el=document.getElementById("resourcesList"); el.innerHTML="";
+    const el = document.getElementById('resourcesList');
+    el.innerHTML='';
     for(const r in state.resources){
-        if(state.resources[r]>0 || r==="ore" || r==="energy"){
-            const val=formatNum(state.resources[r]); const cap=formatNum(state.storage[r]);
-            const div=document.createElement("div"); div.className="resource";
-            div.innerHTML=`<div class="muted">${r}</div><div><span class="stat">${val}</span> / ${cap}</div>`;
-            el.appendChild(div);
+        if(state.resources[r] > 0 || state.factories[r] > 0){
+            el.innerHTML += `<div class="resource"><span>${r}</span><span>${state.resources[r]}</span></div>`;
         }
     }
 }
+
 function renderFactories(){
-    const grid=document.getElementById("factoryGrid"); grid.innerHTML="";
-    for(const key in factoryDefs){
-        const f=factoryDefs[key];
-        if(canAfford(f.cost)){
-            const btn=document.createElement("button");
-            btn.textContent=`Build ${f.name} (${Object.entries(f.cost).map(([k,v])=>v+" "+k).join(" / ")})`;
-            btn.onclick=()=>buildFactory(key); grid.appendChild(btn);
-        }
-    }
+    const el = document.getElementById('factoryGrid');
+    el.innerHTML='';
+    const factories = [
+        { key:'mine', name:'Ore Mine', cost:{ore:10} },
+        { key:'generator', name:'Energy Generator', cost:{ore:5} },
+        { key:'smelter', name:'Smelter', cost:{ore:20, energy:5} },
+        { key:'crystalLab', name:'Crystal Lab', cost:{energy:15} },
+        { key:'alloyForge', name:'Alloy Forge', cost:{metal:20, energy:10} }
+    ];
+    factories.forEach(f=>{
+        const affordable = canAfford(f.cost);
+        el.innerHTML += `
+        <div style="margin-bottom:6px;">
+            <b>${f.name}</b> - x${state.factories[f.key]} <br>
+            <button onclick="buildFactory('${f.key}')" ${affordable?'':'disabled'}>Build (${renderCost(f.cost)})</button>
+        </div>`;
+    });
 }
-function renderStorageBtn(){
-    const cost={ore:200*(state.storageLevel+1),metal:100*(state.storageLevel+1),energy:50*(state.storageLevel+1)};
-    const btn=document.getElementById("storageBtn");
-    if(canAfford(cost)){
-        btn.style.display="block";
-        btn.textContent=`Expand Storage (${cost.ore} Ore / ${cost.metal} Metal / ${cost.energy} Energy)`;
-    }else btn.style.display="none";
-}
+
 function renderResearch(){
-    const grid=document.getElementById("researchGrid"); grid.innerHTML="";
-    for(const key in researchDefs){
-        const r=researchDefs[key]; 
-        if(state.research[key]) continue;
-        if(canAfford(r.cost)){
-            const btn=document.createElement("button");
-            btn.textContent=`Research ${r.name} (${Object.entries(r.cost).map(([k,v])=>v+" "+k).join(" / ")}) - ${r.effect}`;
-            btn.onclick=()=>doResearch(key); grid.appendChild(btn);
-        }
-    }
-}
-function renderMissions(){
-    const grid=document.getElementById("missionsGrid"); grid.innerHTML="";
-    for(const key in missionDefs){
-        const m=missionDefs[key];
-        const ongoing=state.missions[key];
-        const btn=document.createElement("button");
-        if(!ongoing && canAfford(m.cost)){
-            btn.textContent=`${m.name} (${Object.entries(m.cost).map(([k,v])=>v+" "+k).join(" / ")}) - ${m.duration}s`;
-            btn.onclick=()=>startMission(key); grid.appendChild(btn);
-        } else if(ongoing){
-            const remaining=Math.max(0,Math.ceil((ongoing-endTime(key))/1000));
-            btn.textContent=`${m.name} - Mission in progress (${remaining}s)`;
-            btn.disabled=true;
-            grid.appendChild(btn);
-        }
-    }
-}
-function endTime(key){return state.missions[key] ? state.missions[key].start+state.missions[key].duration*1000 : 0;}
-function renderAll(){
-    renderResources(); renderFactories(); renderStorageBtn(); renderResearch(); renderMissions();
-    document.getElementById("planetName").innerText=state.planet||"—";
-    document.getElementById("spaceState").innerText=state.spaceUnlocked?"Unlocked":"Locked";
-    document.getElementById("shipyardCount").innerText=state.structures.shipyard;
-    document.getElementById("aiLabCount").innerText=state.structures.aiLab;
-    document.getElementById("spaceportCount").innerText=state.structures.spaceport;
+    const el = document.getElementById('researchList');
+    el.innerHTML='';
+    const items = [
+        { key:'autoMine', name:'Automatic Mining', cost:{ore:50} },
+        { key:'autoEnergy', name:'Automatic Energy', cost:{energy:50} }
+    ];
+    items.forEach(i=>{
+        const affordable = canAfford(i.cost) && !state.research[i.key];
+        el.innerHTML += `
+        <div style="margin-bottom:6px;">
+            <b>${i.name}</b> - ${state.research[i.key] ? 'Researched' : 'Not researched'} <br>
+            <button onclick="doResearch('${i.key}')" ${affordable?'':'disabled'}>Research (${renderCost(i.cost)})</button>
+        </div>`;
+    });
 }
 
-// =====================
-// Actions
-// =====================
-function startPlanet(name){
-    state=JSON.parse(JSON.stringify(initialState));
-    state.planet=name; state.resources.ore=50; state.resources.metal=20; state.resources.energy=20;
-    document.getElementById("planetSelector").style.display="none";
-    document.getElementById("mainHUD").style.display="block";
-    document.getElementById("main").style.display="flex";
-    renderAll(); save();
+// ============================
+// HELPER FUNCTIONS
+// ============================
+function canAfford(cost){
+    for(const r in cost){
+        if(state.resources[r]===undefined || state.resources[r]<cost[r]) return false;
+    }
+    return true;
 }
-function manualMine(){ addResource("ore",1); renderAll(); save();}
-function manualEnergy(){ addResource("energy",1); renderAll(); save();}
+
+function payCost(cost){
+    for(const r in cost) state.resources[r] -= cost[r];
+}
+
+function renderCost(cost){
+    return Object.entries(cost).map(([r,v])=>`${v} ${r}`).join(' / ');
+}
+
+// ============================
+// FACTORY ACTIONS
+// ============================
 function buildFactory(key){
-    const f=factoryDefs[key];
-    if(canAfford(f.cost)){payCost(f.cost);if(f.consume) for(const r in f.consume) state.resources[r]-=f.consume[r];for(const r in f.produce) addResource(r,f.produce[r]); state.factories[key]++; renderAll(); save();}
+    const factoryCosts = {
+        mine:{ore:10},
+        generator:{ore:5},
+        smelter:{ore:20, energy:5},
+        crystalLab:{energy:15},
+        alloyForge:{metal:20, energy:10}
+    };
+    const cost = factoryCosts[key];
+    if(!canAfford(cost)) return;
+    payCost(cost);
+    state.factories[key]++;
+    renderResources();
+    renderFactories();
+    save();
 }
-function upgradeStorage(){
-    const cost={ore:200*(state.storageLevel+1),metal:100*(state.storageLevel+1),energy:50*(state.storageLevel+1)};
-    if(canAfford(cost)){
-        payCost(cost); state.storageLevel++;
-        for(const r in state.storage) state.storage[r]=Math.floor(state.storage[r]*1.5);
-        renderAll(); save();
-    }
-}
-function buildSpaceport(){
-    const cost={ore:500,metal:200,energy:150};
-    if(canAfford(cost)){payCost(cost); state.structures.spaceport++; state.spaceUnlocked=true; renderAll(); save();}
-}
+
+// ============================
+// RESEARCH ACTIONS
+// ============================
 function doResearch(key){
-    const r=researchDefs[key];
-    if(canAfford(r.cost)){payCost(r.cost); state.research[key]=1; renderAll(); save();}
-}
-function startMission(key){
-    const m=missionDefs[key];
-    if(canAfford(m.cost)){
-        payCost(m.cost);
-        state.missions[key]={start:Date.now(),duration:m.duration};
-        renderAll(); save();
-    }
-}
-
-// =====================
-// Reset
-// =====================
-function openResetMenu(){ document.getElementById("resetPopup").style.display="block"; document.getElementById("resetOverlay").style.display="block";}
-function closeResetMenu(){ document.getElementById("resetPopup").style.display="none"; document.getElementById("resetOverlay").style.display="none";}
-function resetGame(){closeResetMenu(); state=JSON.parse(JSON.stringify(initialState)); save(); location.reload();}
-
-// =====================
-// Tabs
-// =====================
-function switchTab(tabID){
-    ["resourcesTab","factoriesTab","researchTab","missionsTab"].forEach(id=>document.getElementById(id).style.display="none");
-    document.getElementById(tabID).style.display="block";
-    document.querySelectorAll(".tab").forEach(el=>el.classList.remove("active"));
-    event.target.classList.add("active");
+    const researchCosts = {
+        autoMine:{ore:50},
+        autoEnergy:{energy:50}
+    };
+    const cost = researchCosts[key];
+    if(!canAfford(cost) || state.research[key]) return;
+    payCost(cost);
+    state.research[key]=true;
+    renderResearch();
+    save();
 }
 
-// =====================
-// Auto Production
-// =====================
-function autoProduce(dt){
-    for(const key in factoryDefs){
-        const f=factoryDefs[key]; const count=state.factories[key];
-        for(let i=0;i<count;i++){
-            if(f.consume){ let can=true; for(const r in f.consume) if(state.resources[r]<f.consume[r]*dt) can=false; if(!can) continue; for(const r in f.consume) state.resources[r]-=f.consume[r]*dt; }
-            for(const r in f.produce) addResource(r,f.produce[r]*dt);
+// ============================
+// AUTO PRODUCTION LOOP
+// ============================
+function autoProduction(dt){
+    for(const f in state.factories){
+        const count = state.factories[f];
+        if(count<=0) continue;
+        switch(f){
+            case 'mine': addResource('ore', dt*count); break;
+            case 'generator': addResource('energy', dt*count); break;
+            case 'smelter':
+                if(state.resources.ore>=dt*count && state.resources.energy>=dt*count){
+                    state.resources.ore-=dt*count;
+                    state.resources.energy-=dt*count;
+                    addResource('metal', dt*count);
+                }
+                break;
+            case 'crystalLab':
+                if(state.resources.energy>=dt*count) addResource('crystal', dt*count);
+                break;
+            case 'alloyForge':
+                if(state.resources.metal>=dt*count && state.resources.energy>=dt*count){
+                    state.resources.metal-=dt*count;
+                    state.resources.energy-=dt*count;
+                    addResource('alloy', dt*count);
+                }
+                break;
         }
     }
-    // Missions completion
-    for(const key in state.missions){
-        const m=state.missions[key]; if(Date.now()>m.start+m.duration*1000){
-            const reward=missionDefs[key].reward;
-            for(const r in reward) addResource(r,reward[r]);
-            delete state.missions[key];
-        }
-    }
+
+    if(state.research.autoMine) addResource('ore', dt*state.factories.mine);
+    if(state.research.autoEnergy) addResource('energy', dt*state.factories.generator);
 }
 
-// =====================
-// Game Loop
-// =====================
-let lastTime=Date.now();
-function gameLoop(){
-    const now=Date.now(); let dt=(now-lastTime)/1000; lastTime=now;
-    if(dt>0.25) dt=0.25;
-    autoProduce(dt);
+// ============================
+// SAVE / LOAD
+// ============================
+function save(){
+    state.lastSaved = Date.now();
+    localStorage.setItem('spaceCompanySave', JSON.stringify(state));
+    document.getElementById('saveStatus').innerText = `Saved at ${new Date(state.lastSaved).toLocaleTimeString()}`;
+}
+
+function load(){
+    try{
+        const raw = localStorage.getItem('spaceCompanySave');
+        return raw ? JSON.parse(raw) : null;
+    } catch { return null; }
+}
+
+// ============================
+// RESET MENU
+// ============================
+function openResetMenu(){
+    document.getElementById('resetPopup').style.display='block';
+    document.getElementById('resetOverlay').style.display='block';
+}
+
+function closeResetMenu(){
+    document.getElementById('resetPopup').style.display='none';
+    document.getElementById('resetOverlay').style.display='none';
+}
+
+function resetGame(){
+    state = JSON.parse(JSON.stringify(initialState));
+    closeResetMenu();
     renderAll();
-    if(!state.lastSaved||Date.now()-state.lastSaved>5000) save();
+    save();
+}
+
+// ============================
+// MAIN LOOP
+// ============================
+let lastTime = Date.now();
+function gameLoop(){
+    const now = Date.now();
+    let dt = (now-lastTime)/1000;
+    lastTime = now;
+    if(dt>0.25) dt=0.25;
+    autoProduction(dt);
+    renderAll();
     requestAnimationFrame(gameLoop);
 }
-renderAll(); requestAnimationFrame(gameLoop);
+
+// ============================
+// RENDER ALL
+// ============================
+function renderAll(){
+    renderResources();
+    renderFactories();
+    renderResearch();
+}
+
+renderAll();
+requestAnimationFrame(gameLoop);
+// ============================
+// STORAGE UPGRADES
+// ============================
+const storageUpgradeBase = {
+    ore: 1000,
+    metal: 500,
+    energy: 500,
+    crystal: 200,
+    alloy: 200
+};
+
+const storageUpgradeMultiplier = 1.5;
+
+function upgradeStorage(resource){
+    const cost = Math.floor(storageUpgradeBase[resource] / 2);
+    if(state.resources[resource] < cost) return;
+    state.resources[resource] -= cost;
+    state.storage[resource] = Math.floor(state.storage[resource]*storageUpgradeMultiplier);
+    storageUpgradeBase[resource] = state.storage[resource];
+    renderStorageUpgrades();
+    renderResources();
+    save();
+}
+
+function renderStorageUpgrades(){
+    let el = document.getElementById('storageUpgrades');
+    if(!el){
+        const overview = document.getElementById('overview');
+        const panel = document.createElement('div');
+        panel.className='panel';
+        panel.innerHTML='<h3>Storage Upgrades</h3><div id="storageUpgrades"></div>';
+        overview.appendChild(panel);
+        el = document.getElementById('storageUpgrades');
+    }
+    el.innerHTML='';
+    for(const r in state.resources){
+        const cost = Math.floor(storageUpgradeBase[r]/2);
+        const canBuy = state.resources[r]>=cost;
+        el.innerHTML += `
+            <div style="margin-bottom:6px;">
+                <b>${r} Storage:</b> ${state.storage[r]} <br>
+                <button onclick="upgradeStorage('${r}')" ${canBuy?'':'disabled'}>
+                    Upgrade (${cost} ${r})
+                </button>
+            </div>
+        `;
+    }
+}
+
+// ============================
+// MISSIONS / EVENTS
+// ============================
+let missions = [
+    { name:'Asteroid Survey', req:{ore:50}, reward:{crystal:20}, done:false },
+    { name:'Energy Relay Setup', req:{energy:100}, reward:{metal:50}, done:false }
+];
+
+function renderMissions(){
+    let el = document.getElementById('missionPanel');
+    if(!el){
+        const overview = document.getElementById('overview');
+        const panel = document.createElement('div');
+        panel.className='panel';
+        panel.innerHTML='<h3>Missions</h3><div id="missionPanel"></div>';
+        overview.appendChild(panel);
+        el = document.getElementById('missionPanel');
+    }
+    el.innerHTML='';
+    missions.forEach((m,i)=>{
+        if(m.done) return;
+        const canStart = canAfford(m.req);
+        el.innerHTML += `
+            <div style="margin-bottom:6px;">
+                <b>${m.name}</b> <br>
+                <button onclick="startMission(${i})" ${canStart?'':'disabled'}>
+                    Start (${renderCost(m.req)})
+                </button>
+            </div>
+        `;
+    });
+}
+
+function startMission(index){
+    const mission = missions[index];
+    if(!canAfford(mission.req)) return;
+    payCost(mission.req);
+    // instant reward for simplicity, could add timers
+    for(const r in mission.reward) addResource(r, mission.reward[r]);
+    mission.done = true;
+    renderAll();
+    renderMissions();
+    save();
+}
+
+// ============================
+// ACHIEVEMENTS
+// ============================
+const achievements = [
+    { id:'firstOre', name:'First Ore Collected', check:()=>state.resources.ore>=1, done:false },
+    { id:'metalMaster', name:'Metal Collector', check:()=>state.resources.metal>=100, done:false }
+];
+
+function renderAchievements(){
+    let el = document.getElementById('achievementPanel');
+    if(!el){
+        const overview = document.getElementById('overview');
+        const panel = document.createElement('div');
+        panel.className='panel';
+        panel.innerHTML='<h3>Achievements</h3><div id="achievementPanel"></div>';
+        overview.appendChild(panel);
+        el = document.getElementById('achievementPanel');
+    }
+    el.innerHTML='';
+    achievements.forEach(a=>{
+        if(a.done){
+            el.innerHTML += `<div style="margin-bottom:6px; color:#6f6;">${a.name} ✅</div>`;
+        } else if(a.check()){
+            a.done = true;
+            el.innerHTML += `<div style="margin-bottom:6px; color:#6f6;">${a.name} ✅</div>`;
+        } else {
+            el.innerHTML += `<div style="margin-bottom:6px; color:#999;">${a.name}</div>`;
+        }
+    });
+}
+
+// ============================
+// AUTOMATION / AUTO-UPGRADES
+// ============================
+function autoFactories(){
+    for(const f in state.factories){
+        if(state.factories[f]>0){
+            addResource('ore', state.factories[f]*0.1);
+            addResource('energy', state.factories[f]*0.1);
+        }
+    }
+}
+
+// ============================
+// GAME LOOP EXTENSIONS
+// ============================
+function extendedLoop(){
+    const now = Date.now();
+    let dt = (now-lastTime)/1000;
+    lastTime = now;
+    if(dt>0.25) dt=0.25;
+
+    autoProduction(dt);
+    autoFactories();
+    renderAll();
+    renderMissions();
+    renderAchievements();
+    renderStorageUpgrades();
+
+    requestAnimationFrame(extendedLoop);
+}
+
+// ============================
+// INITIAL RENDER CALLS
+// ============================
+renderMissions();
+renderAchievements();
+renderStorageUpgrades();
+requestAnimationFrame(extendedLoop);
+
+// ============================
+// HOTKEYS (Optional Fun Feature)
+// ============================
+document.addEventListener('keydown', e=>{
+    if(e.key==='r') openResetMenu();
+    if(e.key==='o') collect('ore');
+    if(e.key==='e') collect('energy');
+});
+
+// ============================
+// FINAL SAVE INTERVAL
+// ============================
+setInterval(save, 5000);
+
+// ============================
+// UI & TABS
+// ============================
+
+// Add main tabs
+const tabs = ['Overview','Missions','Research','Achievements','Storage'];
+let currentTab = 'Overview';
+
+function renderTabs(){
+    let tabBar = document.getElementById('tabBar');
+    if(!tabBar){
+        tabBar = document.createElement('div');
+        tabBar.id='tabBar';
+        tabBar.style.display='flex';
+        tabBar.style.marginBottom='10px';
+        tabBar.style.justifyContent='space-around';
+        document.body.insertBefore(tabBar, document.getElementById('overview'));
+    }
+    tabBar.innerHTML='';
+    tabs.forEach(tab=>{
+        const button = document.createElement('button');
+        button.innerText = tab;
+        button.onclick=()=>switchTab(tab);
+        button.style.flex='1';
+        button.style.margin='0 2px';
+        button.style.padding='6px';
+        button.style.border='none';
+        button.style.borderRadius='5px';
+        button.style.background = currentTab===tab ? 'linear-gradient(to right, #4a90e2, #50e3c2)' : 'linear-gradient(to right, #888, #aaa)';
+        button.style.color='white';
+        button.style.cursor='pointer';
+        button.onmouseover = ()=>button.style.opacity='0.85';
+        button.onmouseout = ()=>button.style.opacity='1';
+        tabBar.appendChild(button);
+    });
+}
+
+function switchTab(tab){
+    currentTab = tab;
+    tabs.forEach(t=>{
+        const panel = document.getElementById(t.toLowerCase()+'Panel') || document.getElementById(t.toLowerCase()+'Upgrades');
+        if(panel) panel.style.display = (t===tab)?'block':'none';
+    });
+    renderTabs();
+}
+
+// ============================
+// GRADIENT BUTTON STYLING
+// ============================
+function styleButtons(){
+    const buttons = document.querySelectorAll('button');
+    buttons.forEach(btn=>{
+        if(!btn.style.background.includes('linear-gradient')){
+            btn.style.background = 'linear-gradient(to right, #6a11cb, #2575fc)';
+            btn.style.color = 'white';
+            btn.style.border='none';
+            btn.style.borderRadius='5px';
+            btn.style.padding='4px 8px';
+            btn.style.margin='2px 0';
+            btn.style.cursor='pointer';
+            btn.onmouseover=()=>btn.style.opacity='0.85';
+            btn.onmouseout=()=>btn.style.opacity='1';
+        }
+    });
+}
+
+// ============================
+// RESEARCH TAB
+// ============================
+if(!state.research) state.research={automation:false, efficiency:false, storageBoost:false};
+const researchList=[
+    {id:'automation', name:'Auto Production', cost:{crystal:50, metal:50}},
+    {id:'efficiency', name:'Resource Efficiency', cost:{metal:100, alloy:50}},
+    {id:'storageBoost', name:'Storage Boost', cost:{alloy:100, crystal:50}}
+];
+
+function renderResearch(){
+    let el = document.getElementById('researchPanel');
+    if(!el){
+        const overview = document.getElementById('overview');
+        const panel = document.createElement('div');
+        panel.id='researchPanel';
+        panel.className='panel';
+        panel.innerHTML='<h3>Research</h3>';
+        overview.appendChild(panel);
+        el = panel;
+    }
+    el.style.display=(currentTab==='Research')?'block':'none';
+    el.innerHTML='<h3>Research</h3>';
+    researchList.forEach(r=>{
+        const done = state.research[r.id];
+        const canAffordRes = canAfford(r.cost);
+        el.innerHTML += `
+            <div style="margin-bottom:6px;">
+                <b>${r.name}</b> ${done?'✅':'(Cost: '+renderCost(r.cost)+')'}<br>
+                <button onclick="buyResearch('${r.id}')" ${done||!canAffordRes?'disabled':''}>
+                    ${done?'Completed':'Research'}
+                </button>
+            </div>
+        `;
+    });
+    styleButtons();
+}
+
+function buyResearch(id){
+    const research = researchList.find(r=>r.id===id);
+    if(!research || state.research[id]) return;
+    if(!canAfford(research.cost)) return;
+    payCost(research.cost);
+    state.research[id]=true;
+
+    // Apply effects
+    if(id==='automation'){
+        state.autoProduction=true;
+    }
+    if(id==='efficiency'){
+        for(const r in state.resources) state.resources[r]*=1.1;
+    }
+    if(id==='storageBoost'){
+        for(const r in state.storage) state.storage[r]=Math.floor(state.storage[r]*1.2);
+    }
+    renderAll();
+    renderResearch();
+    save();
+}
+
+// ============================
+// OVERALL PANEL STYLING
+// ============================
+document.querySelectorAll('.panel').forEach(panel=>{
+    panel.style.background='linear-gradient(to bottom, #222, #444)';
+    panel.style.color='white';
+    panel.style.borderRadius='10px';
+    panel.style.padding='10px';
+    panel.style.margin='8px';
+});
+
+// ============================
+// INITIAL CALLS
+// ============================
+renderTabs();
+switchTab('Overview');
+renderResearch();
+styleButtons();
+
 </script>
 </body>
 </html>
