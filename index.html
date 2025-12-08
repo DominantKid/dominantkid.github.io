@@ -339,14 +339,29 @@ function renderResources(){
 }
 
 function renderFactories(){
-    const el=document.getElementById("factoryList");
-    el.innerHTML="";
+    const el = document.getElementById("factoryList");
+    // Only render once if empty
+    if(el.innerHTML === ""){
+        for(let id in FactoryTypes){
+            const f = FactoryTypes[id];
+            el.innerHTML += `<div class="resource">
+                <div><b>${f.name}</b>
+                    <div style="font-size:12px;opacity:0.7;">Cost: ${renderCost(f.cost)}</div>
+                </div>
+                <div>
+                    x<span id="count-${id}">${Game.factories[id]}</span><br>
+                    <button id="build-${id}" onclick="buildFactory('${id}')">Build</button>
+                </div>
+            </div>`;
+        }
+    }
+    // Update counts and button states
     for(let id in FactoryTypes){
-        const f=FactoryTypes[id];
-        const canBuy=canAfford(f.cost);
-        el.innerHTML+=`<div class="resource"><div><b>${f.name}</b><div style="font-size:12px;opacity:0.7;">Cost: ${renderCost(f.cost)}</div></div><div>x${Game.factories[id]}<br><button ${canBuy?"":"disabled"} onclick="buildFactory('${id}')">Build</button></div></div>`;
+        document.getElementById(`count-${id}`).textContent = Game.factories[id];
+        document.getElementById(`build-${id}`).disabled = !canAfford(FactoryTypes[id].cost);
     }
 }
+
 function renderCost(cost){ return Object.entries(cost).map(([r,v])=>`${v} ${r}`).join(", "); }
 
 function renderResearchUI(){
