@@ -155,63 +155,29 @@ button:hover { filter: brightness(1.15); }
 </div>
 
 <script>
-/* ============================================================
-   GALAXY INDUSTRY — CLEAN GAME ENGINE (v1.0)
-   ============================================================ */
+// ============================================================
+// GALAXY INDUSTRY — CLEAN GAME ENGINE (v1.0)
+// ============================================================
 
-/* ------------------------------------------------------------
-   1. GAME STATE
------------------------------------------------------------- */
-
+// 1. GAME STATE
 const Game = {
-    resources: {
-        ore: 0,
-        metal: 0,
-        energy: 0,
-        crystal: 0,
-        alloy: 0
-    },
-
-    storage: {
-        ore: 1000,
-        metal: 500,
-        energy: 500,
-        crystal: 250,
-        alloy: 250
-    },
-
-    factories: {
-        mine: 0,
-        generator: 0,
-        smelter: 0,
-        crystalLab: 0,
-        alloyForge: 0
-    },
-
-    research: {
-        autoMine: false,
-        autoEnergy: false,
-        efficiency: false
-    },
-
+    resources: { ore: 0, metal: 0, energy: 0, crystal: 0, alloy: 0 },
+    storage: { ore: 1000, metal: 500, energy: 500, crystal: 250, alloy: 250 },
+    factories: { mine: 0, generator: 0, smelter: 0, crystalLab: 0, alloyForge: 0 },
+    research: { autoMine: false, autoEnergy: false, efficiency: false },
     missions: [
         { id: 1, name: "Asteroid Survey", cost: { ore: 50 }, reward: { crystal: 20 }, done: false },
         { id: 2, name: "Satellite Relay", cost: { energy: 100 }, reward: { metal: 50 }, done: false }
     ],
-
     achievements: [
         { id: "firstOre", name: "Collect 1 ore", check: () => Game.resources.ore >= 1, done: false },
         { id: "hundredMetal", name: "Collect 100 metal", check: () => Game.resources.metal >= 100, done: false }
     ],
-
     lastTick: Date.now(),
     uiThrottle: 0
 };
 
-/* ------------------------------------------------------------
-   2. FACTORY DEFINITIONS
------------------------------------------------------------- */
-
+// 2. FACTORY DEFINITIONS
 const FactoryTypes = {
     mine: {
         name: "Ore Mine",
@@ -226,104 +192,76 @@ const FactoryTypes = {
     smelter: {
         name: "Smelter",
         cost: { ore: 20, energy: 5 },
-        produce(dt, n) {
-            if (spend({ ore: dt * n, energy: dt * n })) addResource("metal", dt * n);
-        }
+        produce(dt, n) { if(spend({ ore: dt*n, energy: dt*n })) addResource("metal", dt*n); }
     },
     crystalLab: {
         name: "Crystal Lab",
         cost: { energy: 15 },
-        produce(dt, n) { if (spend({ energy: dt * n })) addResource("crystal", dt * n); }
+        produce(dt, n) { if(spend({ energy: dt*n })) addResource("crystal", dt*n); }
     },
     alloyForge: {
         name: "Alloy Forge",
         cost: { metal: 20, energy: 10 },
-        produce(dt, n) { if (spend({ metal: dt * n, energy: dt * n })) addResource("alloy", dt * n); }
+        produce(dt, n) { if(spend({ metal: dt*n, energy: dt*n })) addResource("alloy", dt*n); }
     }
 };
 
-/* ------------------------------------------------------------
-   3. RESEARCH SYSTEM
------------------------------------------------------------- */
-
+// 3. RESEARCH SYSTEM
 const ResearchList = {
     autoMine: { name: "Automated Mining", cost: { ore: 50 } },
     autoEnergy: { name: "Automated Energy", cost: { energy: 50 } },
     efficiency: { name: "Resource Efficiency", cost: { metal: 100, crystal: 50 } }
 };
 
-/* ------------------------------------------------------------
-   4. STORAGE UPGRADE SYSTEM
------------------------------------------------------------- */
+// 4. STORAGE UPGRADE SYSTEM
+function storageUpgradeCost(resource){ return Math.floor(Game.storage[resource]*0.4); }
 
-function storageUpgradeCost(resource) { return Math.floor(Game.storage[resource] * 0.4); }
-
-/* ------------------------------------------------------------
-   5. HELPERS
------------------------------------------------------------- */
-
-function clamp(num) { return Math.round(num * 1000) / 1000; }
-
-function addResource(type, amount) {
-    amount = clamp(amount);
-    Game.resources[type] = Math.min(Game.resources[type] + amount, Game.storage[type]);
+// 5. HELPERS
+function clamp(num){ return Math.round(num*1000)/1000; }
+function addResource(type, amount){
+    amount=clamp(amount);
+    Game.resources[type] = Math.min(Game.resources[type]+amount, Game.storage[type]);
 }
-
-function spend(cost) {
-    for (let r in cost) if (Game.resources[r] < cost[r]) return false;
-    for (let r in cost) Game.resources[r] -= cost[r];
+function spend(cost){
+    for(let r in cost) if(Game.resources[r]<cost[r]) return false;
+    for(let r in cost) Game.resources[r]-=cost[r];
     return true;
 }
+function canAfford(cost){ for(let r in cost) if(Game.resources[r]<cost[r]) return false; return true; }
 
-function canAfford(cost) { for (let r in cost) if (Game.resources[r] < cost[r]) return false; return true; }
+// 6. GAME ACTIONS
+function buildFactory(id){ if(!canAfford(FactoryTypes[id].cost)) return; spend(FactoryTypes[id].cost); Game.factories[id]++; saveGame(); }
+function buyResearch(id){ if(Game.research[id]) return; if(!canAfford(ResearchList[id].cost)) return; spend(ResearchList[id].cost); Game.research[id]=true; saveGame(); }
+function upgradeStorage(resource){ const cost = storageUpgradeCost(resource); if(Game.resources[resource]<cost) return; Game.resources[resource]-=cost; Game.storage[resource]=Math.floor(Game.storage[resource]*1.5); saveGame(); }
+function startMission(idx){ const m=Game.missions[idx]; if(m.done || !canAfford(m.cost)) return; spend(m.cost); for(let r in m.reward) addResource(r, m.reward[r]); m.done=true; saveGame(); }
 
-/* ------------------------------------------------------------
-   6. GAME ACTIONS
------------------------------------------------------------- */
+// 7. ACHIEVEMENTS
+function checkAchievements(){ Game.achievements.forEach(a=>{ if(!a.done && a.check()) a.done=true; }); }
 
-function buildFactory(id) { if (!canAfford(FactoryTypes[id].cost)) return; spend(FactoryTypes[id].cost); Game.factories[id]++; saveGame(); }
-function buyResearch(id) { if (Game.research[id]) return; if (!canAfford(ResearchList[id].cost)) return; spend(ResearchList[id].cost); Game.research[id] = true; saveGame(); }
-function upgradeStorage(resource) { const cost = storageUpgradeCost(resource); if (Game.resources[resource] < cost) return; Game.resources[resource] -= cost; Game.storage[resource] = Math.floor(Game.storage[resource]*1.5); saveGame(); }
-function startMission(idx) { const m = Game.missions[idx]; if (m.done || !canAfford(m.cost)) return; spend(m.cost); for(let r in m.reward) addResource(r, m.reward[r]); m.done = true; saveGame(); }
-
-/* ------------------------------------------------------------
-   7. ACHIEVEMENTS
------------------------------------------------------------- */
-
-function checkAchievements() { Game.achievements.forEach(a => { if (!a.done && a.check()) a.done = true; }); }
-
-/* ------------------------------------------------------------
-   8. SAVE / LOAD
------------------------------------------------------------- */
-
-function saveGame() { localStorage.setItem("galaxyIndustrySave", JSON.stringify(Game)); }
-function loadGame() {
-    const data = localStorage.getItem("galaxyIndustrySave"); if (!data) return;
-    const obj = JSON.parse(data);
-    Object.assign(Game.resources, obj.resources || {});
-    Object.assign(Game.storage, obj.storage || {});
-    Object.assign(Game.factories, obj.factories || {});
-    Object.assign(Game.research, obj.research || {});
-    Game.missions = obj.missions || Game.missions;
-    Game.achievements = obj.achievements || Game.achievements;
+// 8. SAVE / LOAD
+function saveGame(){ localStorage.setItem("galaxyIndustrySave", JSON.stringify(Game)); }
+function loadGame(){
+    const data=localStorage.getItem("galaxyIndustrySave");
+    if(!data) return;
+    const obj=JSON.parse(data);
+    Object.assign(Game.resources, obj.resources||{});
+    Object.assign(Game.storage, obj.storage||{});
+    Object.assign(Game.factories, obj.factories||{});
+    Object.assign(Game.research, obj.research||{});
+    Game.missions=obj.missions||Game.missions;
+    Game.achievements=obj.achievements||Game.achievements;
 }
 loadGame();
 
-/* ------------------------------------------------------------
-   9. GAME LOOP
------------------------------------------------------------- */
+// 9. GAME LOOP
+function gameLoop(){
+    const now=Date.now();
+    const dt=Math.min((now-Game.lastTick)/1000, 0.25);
+    Game.lastTick=now;
 
-function gameLoop() {
-    const now = Date.now();
-    const dt = Math.min((now - Game.lastTick)/1000, 0.25);
-    Game.lastTick = now;
-
-    for(let id in FactoryTypes) {
-        let count = Game.factories[id];
-        if(count>0){ 
-            let multiplier = Game.research.efficiency ? 1.2 : 1;
-            FactoryTypes[id].produce(dt, count*multiplier);
-        }
+    for(let id in FactoryTypes){
+        let count=Game.factories[id];
+        if(count>0){ let multiplier=Game.research.efficiency?1.2:1; FactoryTypes[id].produce(dt,count*multiplier); }
     }
 
     if(Game.research.autoMine) addResource("ore", dt*0.4);
@@ -331,20 +269,16 @@ function gameLoop() {
 
     checkAchievements();
 
-    Game.uiThrottle += dt;
+    Game.uiThrottle+=dt;
     if(Game.uiThrottle>=0.1){ renderAll(); Game.uiThrottle=0; }
 
     requestAnimationFrame(gameLoop);
 }
 requestAnimationFrame(gameLoop);
 
-/* ============================================================
-   PART 3 — UI RENDERING + TAB SYSTEM
-   ============================================================ */
-
-/* TAB SYSTEM */
-document.querySelectorAll(".tab").forEach(tab => {
-    tab.addEventListener("click", () => {
+// 10. UI RENDERING + TAB SYSTEM
+document.querySelectorAll(".tab").forEach(tab=>{
+    tab.addEventListener("click",()=>{
         document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
         tab.classList.add("active");
         document.querySelectorAll(".tab-panel").forEach(p=>p.style.display="none");
@@ -353,27 +287,28 @@ document.querySelectorAll(".tab").forEach(tab => {
     });
 });
 
-/* RESOURCE LIST */
 function renderResources(){
-    const el = document.getElementById("resourceList"); el.innerHTML="";
-    for(let r in Game.resources) el.innerHTML+=`<div class="resource"><span>${r.toUpperCase()}</span><span>${Game.resources[r].toFixed(1)} / ${Game.storage[r]}</span></div>`;
-}
-
-/* FACTORY LIST */
-function renderFactories(){
-    const el = document.getElementById("factoryList"); el.innerHTML="";
-    for(let id in FactoryTypes){
-        const f = FactoryTypes[id];
-        const canBuy = canAfford(f.cost);
-        el.innerHTML+=`<div class="resource"><div><b>${f.name}</b><div style="font-size:12px;opacity:0.7;">Cost: ${renderCost(f.cost)}</div></div><div>x${Game.factories[id]}<br><button ${canBuy?"":"disabled"} onclick="buildFactory('${id}')">Build</button></div></div>`;
+    const el=document.getElementById("resourceList");
+    el.innerHTML="";
+    for(let r in Game.resources){
+        el.innerHTML+=`<div class="resource"><span>${r.toUpperCase()}</span><span>${Game.resources[r].toFixed(1)} / ${Game.storage[r]}</span></div>`;
     }
 }
 
+function renderFactories(){
+    const el=document.getElementById("factoryList");
+    el.innerHTML="";
+    for(let id in FactoryTypes){
+        const f=FactoryTypes[id];
+        const canBuy=canAfford(f.cost);
+        el.innerHTML+=`<div class="resource"><div><b>${f.name}</b><div style="font-size:12px;opacity:0.7;">Cost: ${renderCost(f.cost)}</div></div><div>x${Game.factories[id]}<br><button ${canBuy?"":"disabled"} onclick="buildFactory('${id}')">Build</button></div></div>`;
+    }
+}
 function renderCost(cost){ return Object.entries(cost).map(([r,v])=>`${v} ${r}`).join(", "); }
 
-/* RESEARCH LIST */
 function renderResearchUI(){
-    const el=document.getElementById("researchList"); el.innerHTML="";
+    const el=document.getElementById("researchList");
+    el.innerHTML="";
     for(let id in ResearchList){
         const r=ResearchList[id];
         const done=Game.research[id];
@@ -382,9 +317,9 @@ function renderResearchUI(){
     }
 }
 
-/* STORAGE UPGRADES */
 function renderStorage(){
-    const el=document.getElementById("storageList"); el.innerHTML="";
+    const el=document.getElementById("storageList");
+    el.innerHTML="";
     for(let r in Game.storage){
         const cost=storageUpgradeCost(r);
         const canBuy=Game.resources[r]>=cost;
@@ -392,24 +327,23 @@ function renderStorage(){
     }
 }
 
-/* MISSIONS */
 function renderMissionsUI(){
-    const el=document.getElementById("missionList"); el.innerHTML="";
+    const el=document.getElementById("missionList");
+    el.innerHTML="";
     Game.missions.forEach((m,i)=>{
         const canStart=canAfford(m.cost);
         el.innerHTML+=`<div class="resource"><div><b>${m.name}</b><div style="font-size:12px;opacity:0.7;">${m.done?"Completed ✔":"Cost: "+renderCost(m.cost)}</div></div><div><button ${(!m.done && canStart)?"":"disabled"} onclick="startMission(${i})">${m.done?"Done":"Start"}</button></div></div>`;
     });
 }
 
-/* ACHIEVEMENTS */
 function renderAchievementsUI(){
-    const el=document.getElementById("achievementList"); el.innerHTML="";
+    const el=document.getElementById("achievementList");
+    el.innerHTML="";
     Game.achievements.forEach(a=>{
         el.innerHTML+=`<div class="resource" style="color:${a.done?'#66ff88':'#999'};"><span>${a.name}</span><span>${a.done?"✔":"—"}</span></div>`;
     });
 }
 
-/* RENDER ALL */
 function renderAll(){
     renderResources();
     renderFactories();
@@ -419,6 +353,5 @@ function renderAll(){
     renderAchievementsUI();
 }
 </script>
-
 </body>
 </html>
