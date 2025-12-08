@@ -153,6 +153,8 @@ button:hover { filter: brightness(1.15); }
     <h2>Achievements</h2>
     <div id="achievementList"></div>
 </div>
+
+<script>
 /* ============================================================
    GALAXY INDUSTRY — CLEAN GAME ENGINE (v1.0)
    ============================================================ */
@@ -214,47 +216,29 @@ const FactoryTypes = {
     mine: {
         name: "Ore Mine",
         cost: { ore: 10 },
-        produce(dt, n) {
-            addResource("ore", dt * n);
-        }
+        produce(dt, n) { addResource("ore", dt * n); }
     },
-
     generator: {
         name: "Energy Generator",
         cost: { ore: 5 },
-        produce(dt, n) {
-            addResource("energy", dt * n);
-        }
+        produce(dt, n) { addResource("energy", dt * n); }
     },
-
     smelter: {
         name: "Smelter",
         cost: { ore: 20, energy: 5 },
         produce(dt, n) {
-            if (spend({ ore: dt * n, energy: dt * n })) {
-                addResource("metal", dt * n);
-            }
+            if (spend({ ore: dt * n, energy: dt * n })) addResource("metal", dt * n);
         }
     },
-
     crystalLab: {
         name: "Crystal Lab",
         cost: { energy: 15 },
-        produce(dt, n) {
-            if (spend({ energy: dt * n })) {
-                addResource("crystal", dt * n);
-            }
-        }
+        produce(dt, n) { if (spend({ energy: dt * n })) addResource("crystal", dt * n); }
     },
-
     alloyForge: {
         name: "Alloy Forge",
         cost: { metal: 20, energy: 10 },
-        produce(dt, n) {
-            if (spend({ metal: dt * n, energy: dt * n })) {
-                addResource("alloy", dt * n);
-            }
-        }
+        produce(dt, n) { if (spend({ metal: dt * n, energy: dt * n })) addResource("alloy", dt * n); }
     }
 };
 
@@ -272,17 +256,13 @@ const ResearchList = {
    4. STORAGE UPGRADE SYSTEM
 ------------------------------------------------------------ */
 
-function storageUpgradeCost(resource) {
-    return Math.floor(Game.storage[resource] * 0.4);
-}
+function storageUpgradeCost(resource) { return Math.floor(Game.storage[resource] * 0.4); }
 
 /* ------------------------------------------------------------
    5. HELPERS
 ------------------------------------------------------------ */
 
-function clamp(num) {
-    return Math.round(num * 1000) / 1000;
-}
+function clamp(num) { return Math.round(num * 1000) / 1000; }
 
 function addResource(type, amount) {
     amount = clamp(amount);
@@ -290,84 +270,36 @@ function addResource(type, amount) {
 }
 
 function spend(cost) {
-    for (let r in cost) {
-        if (Game.resources[r] < cost[r]) return false;
-    }
-    for (let r in cost) {
-        Game.resources[r] -= cost[r];
-    }
+    for (let r in cost) if (Game.resources[r] < cost[r]) return false;
+    for (let r in cost) Game.resources[r] -= cost[r];
     return true;
 }
 
-function canAfford(cost) {
-    for (let r in cost) if (Game.resources[r] < cost[r]) return false;
-    return true;
-}
+function canAfford(cost) { for (let r in cost) if (Game.resources[r] < cost[r]) return false; return true; }
 
 /* ------------------------------------------------------------
    6. GAME ACTIONS
 ------------------------------------------------------------ */
 
-function buildFactory(id) {
-    const f = FactoryTypes[id];
-    if (!canAfford(f.cost)) return;
-    spend(f.cost);
-    Game.factories[id]++;
-    saveGame();
-}
-
-function buyResearch(id) {
-    if (Game.research[id]) return;
-    const r = ResearchList[id];
-    if (!canAfford(r.cost)) return;
-    spend(r.cost);
-    Game.research[id] = true;
-    saveGame();
-}
-
-function upgradeStorage(resource) {
-    const cost = storageUpgradeCost(resource);
-    if (Game.resources[resource] < cost) return;
-
-    Game.resources[resource] -= cost;
-    Game.storage[resource] = Math.floor(Game.storage[resource] * 1.5);
-    saveGame();
-}
-
-function startMission(idx) {
-    const m = Game.missions[idx];
-    if (m.done) return;
-    if (!canAfford(m.cost)) return;
-
-    spend(m.cost);
-    for (let r in m.reward) addResource(r, m.reward[r]);
-    m.done = true;
-    saveGame();
-}
+function buildFactory(id) { if (!canAfford(FactoryTypes[id].cost)) return; spend(FactoryTypes[id].cost); Game.factories[id]++; saveGame(); }
+function buyResearch(id) { if (Game.research[id]) return; if (!canAfford(ResearchList[id].cost)) return; spend(ResearchList[id].cost); Game.research[id] = true; saveGame(); }
+function upgradeStorage(resource) { const cost = storageUpgradeCost(resource); if (Game.resources[resource] < cost) return; Game.resources[resource] -= cost; Game.storage[resource] = Math.floor(Game.storage[resource]*1.5); saveGame(); }
+function startMission(idx) { const m = Game.missions[idx]; if (m.done || !canAfford(m.cost)) return; spend(m.cost); for(let r in m.reward) addResource(r, m.reward[r]); m.done = true; saveGame(); }
 
 /* ------------------------------------------------------------
    7. ACHIEVEMENTS
 ------------------------------------------------------------ */
 
-function checkAchievements() {
-    Game.achievements.forEach(a => {
-        if (!a.done && a.check()) a.done = true;
-    });
-}
+function checkAchievements() { Game.achievements.forEach(a => { if (!a.done && a.check()) a.done = true; }); }
 
 /* ------------------------------------------------------------
    8. SAVE / LOAD
 ------------------------------------------------------------ */
 
-function saveGame() {
-    localStorage.setItem("galaxyIndustrySave", JSON.stringify(Game));
-}
-
+function saveGame() { localStorage.setItem("galaxyIndustrySave", JSON.stringify(Game)); }
 function loadGame() {
-    const data = localStorage.getItem("galaxyIndustrySave");
-    if (!data) return;
+    const data = localStorage.getItem("galaxyIndustrySave"); if (!data) return;
     const obj = JSON.parse(data);
-
     Object.assign(Game.resources, obj.resources || {});
     Object.assign(Game.storage, obj.storage || {});
     Object.assign(Game.factories, obj.factories || {});
@@ -383,216 +315,102 @@ loadGame();
 
 function gameLoop() {
     const now = Date.now();
-    const dt = Math.min((now - Game.lastTick) / 1000, 0.25);
+    const dt = Math.min((now - Game.lastTick)/1000, 0.25);
     Game.lastTick = now;
 
-    // Factory Production
-    for (let id in FactoryTypes) {
+    for(let id in FactoryTypes) {
         let count = Game.factories[id];
-        if (count > 0) {
+        if(count>0){ 
             let multiplier = Game.research.efficiency ? 1.2 : 1;
-            FactoryTypes[id].produce(dt, count * multiplier);
+            FactoryTypes[id].produce(dt, count*multiplier);
         }
     }
 
-    // Automatic resource generation
-    if (Game.research.autoMine) addResource("ore", dt * 0.4);
-    if (Game.research.autoEnergy) addResource("energy", dt * 0.4);
+    if(Game.research.autoMine) addResource("ore", dt*0.4);
+    if(Game.research.autoEnergy) addResource("energy", dt*0.4);
 
-    // Achievements
     checkAchievements();
 
-    // UI Update Limit (10 per second)
     Game.uiThrottle += dt;
-    if (Game.uiThrottle >= 0.1) {
-        renderAll();
-        Game.uiThrottle = 0;
-    }
+    if(Game.uiThrottle>=0.1){ renderAll(); Game.uiThrottle=0; }
 
     requestAnimationFrame(gameLoop);
 }
 requestAnimationFrame(gameLoop);
 
-/* ------------------------------------------------------------
-   PART 3 COMES NEXT — DO NOT CLOSE SCRIPT TAG YET
------------------------------------------------------------- */
 /* ============================================================
    PART 3 — UI RENDERING + TAB SYSTEM
    ============================================================ */
 
-/* ------------------------------------------------------------
-   A. TAB SYSTEM
------------------------------------------------------------- */
-
+/* TAB SYSTEM */
 document.querySelectorAll(".tab").forEach(tab => {
     tab.addEventListener("click", () => {
-        document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+        document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
         tab.classList.add("active");
-
-        document.querySelectorAll(".tab-panel").forEach(p => p.style.display = "none");
-        document.getElementById(tab.dataset.tab).style.display = "block";
-
+        document.querySelectorAll(".tab-panel").forEach(p=>p.style.display="none");
+        document.getElementById(tab.dataset.tab).style.display="block";
         renderAll();
     });
 });
 
-/* ------------------------------------------------------------
-   B. RESOURCE LIST
------------------------------------------------------------- */
-
-function renderResources() {
-    const el = document.getElementById("resourceList");
-    el.innerHTML = "";
-
-    for (let r in Game.resources) {
-        el.innerHTML += `
-            <div class="resource">
-                <span>${r.toUpperCase()}</span>
-                <span>${Game.resources[r].toFixed(1)} / ${Game.storage[r]}</span>
-            </div>`;
-    }
+/* RESOURCE LIST */
+function renderResources(){
+    const el = document.getElementById("resourceList"); el.innerHTML="";
+    for(let r in Game.resources) el.innerHTML+=`<div class="resource"><span>${r.toUpperCase()}</span><span>${Game.resources[r].toFixed(1)} / ${Game.storage[r]}</span></div>`;
 }
 
-/* ------------------------------------------------------------
-   C. FACTORY LIST
------------------------------------------------------------- */
-
-function renderFactories() {
-    const el = document.getElementById("factoryList");
-    el.innerHTML = "";
-
-    for (let id in FactoryTypes) {
+/* FACTORY LIST */
+function renderFactories(){
+    const el = document.getElementById("factoryList"); el.innerHTML="";
+    for(let id in FactoryTypes){
         const f = FactoryTypes[id];
         const canBuy = canAfford(f.cost);
-
-        el.innerHTML += `
-            <div class="resource">
-                <div>
-                    <b>${f.name}</b> 
-                    <div style="font-size:12px;opacity:0.7;">Cost: ${renderCost(f.cost)}</div>
-                </div>
-                <div>
-                    x${Game.factories[id]}<br>
-                    <button ${canBuy ? "" : "disabled"} onclick="buildFactory('${id}')">Build</button>
-                </div>
-            </div>`;
+        el.innerHTML+=`<div class="resource"><div><b>${f.name}</b><div style="font-size:12px;opacity:0.7;">Cost: ${renderCost(f.cost)}</div></div><div>x${Game.factories[id]}<br><button ${canBuy?"":"disabled"} onclick="buildFactory('${id}')">Build</button></div></div>`;
     }
 }
 
-function renderCost(cost) {
-    return Object.entries(cost)
-        .map(([r, v]) => `${v} ${r}`)
-        .join(", ");
-}
+function renderCost(cost){ return Object.entries(cost).map(([r,v])=>`${v} ${r}`).join(", "); }
 
-/* ------------------------------------------------------------
-   D. RESEARCH LIST
------------------------------------------------------------- */
-
-function renderResearchUI() {
-    const el = document.getElementById("researchList");
-    el.innerHTML = "";
-
-    for (let id in ResearchList) {
-        const r = ResearchList[id];
-        const done = Game.research[id];
-        const canBuy = canAfford(r.cost);
-
-        el.innerHTML += `
-            <div class="resource">
-                <div>
-                    <b>${r.name}</b>
-                    <div style="font-size:12px;opacity:0.7;">
-                        ${done ? "Completed ✔" : "Cost: " + renderCost(r.cost)}
-                    </div>
-                </div>
-                <div>
-                    <button ${(!done && canBuy) ? "" : "disabled"} onclick="buyResearch('${id}')">
-                        ${done ? "Done" : "Research"}
-                    </button>
-                </div>
-            </div>`;
+/* RESEARCH LIST */
+function renderResearchUI(){
+    const el=document.getElementById("researchList"); el.innerHTML="";
+    for(let id in ResearchList){
+        const r=ResearchList[id];
+        const done=Game.research[id];
+        const canBuy=canAfford(r.cost);
+        el.innerHTML+=`<div class="resource"><div><b>${r.name}</b><div style="font-size:12px;opacity:0.7;">${done?"Completed ✔":"Cost: "+renderCost(r.cost)}</div></div><div><button ${(!done && canBuy)?"":"disabled"} onclick="buyResearch('${id}')">${done?"Done":"Research"}</button></div></div>`;
     }
 }
 
-/* ------------------------------------------------------------
-   E. STORAGE UPGRADES
------------------------------------------------------------- */
-
-function renderStorage() {
-    const el = document.getElementById("storageList");
-    el.innerHTML = "";
-
-    for (let r in Game.storage) {
-        const cost = storageUpgradeCost(r);
-        const canBuy = Game.resources[r] >= cost;
-
-        el.innerHTML += `
-            <div class="resource">
-                <div>
-                    <b>${r.toUpperCase()} Storage</b>
-                    <div style="font-size:12px;opacity:0.7;">Current: ${Game.storage[r]}</div>
-                </div>
-                <div>
-                    <button ${canBuy ? "" : "disabled"} onclick="upgradeStorage('${r}')">
-                        Upgrade (${cost} ${r})
-                    </button>
-                </div>
-            </div>`;
+/* STORAGE UPGRADES */
+function renderStorage(){
+    const el=document.getElementById("storageList"); el.innerHTML="";
+    for(let r in Game.storage){
+        const cost=storageUpgradeCost(r);
+        const canBuy=Game.resources[r]>=cost;
+        el.innerHTML+=`<div class="resource"><div><b>${r.toUpperCase()} Storage</b><div style="font-size:12px;opacity:0.7;">Current: ${Game.storage[r]}</div></div><div><button ${canBuy?"":"disabled"} onclick="upgradeStorage('${r}')">Upgrade (${cost} ${r})</button></div></div>`;
     }
 }
 
-/* ------------------------------------------------------------
-   F. MISSIONS
------------------------------------------------------------- */
-
-function renderMissionsUI() {
-    const el = document.getElementById("missionList");
-    el.innerHTML = "";
-
-    Game.missions.forEach((m, i) => {
-        const canStart = canAfford(m.cost);
-
-        el.innerHTML += `
-            <div class="resource">
-                <div>
-                    <b>${m.name}</b>
-                    <div style="font-size:12px;opacity:0.7;">
-                        ${m.done ? "Completed ✔" : "Cost: " + renderCost(m.cost)}
-                    </div>
-                </div>
-                <div>
-                    <button ${(!m.done && canStart) ? "" : "disabled"} onclick="startMission(${i})">
-                        ${m.done ? "Done" : "Start"}
-                    </button>
-                </div>
-            </div>`;
+/* MISSIONS */
+function renderMissionsUI(){
+    const el=document.getElementById("missionList"); el.innerHTML="";
+    Game.missions.forEach((m,i)=>{
+        const canStart=canAfford(m.cost);
+        el.innerHTML+=`<div class="resource"><div><b>${m.name}</b><div style="font-size:12px;opacity:0.7;">${m.done?"Completed ✔":"Cost: "+renderCost(m.cost)}</div></div><div><button ${(!m.done && canStart)?"":"disabled"} onclick="startMission(${i})">${m.done?"Done":"Start"}</button></div></div>`;
     });
 }
 
-/* ------------------------------------------------------------
-   G. ACHIEVEMENTS
------------------------------------------------------------- */
-
-function renderAchievementsUI() {
-    const el = document.getElementById("achievementList");
-    el.innerHTML = "";
-
-    Game.achievements.forEach(a => {
-        el.innerHTML += `
-            <div class="resource" style="color:${a.done ? '#66ff88' : '#999'};">
-                <span>${a.name}</span>
-                <span>${a.done ? "✔" : "—"}</span>
-            </div>
-        `;
+/* ACHIEVEMENTS */
+function renderAchievementsUI(){
+    const el=document.getElementById("achievementList"); el.innerHTML="";
+    Game.achievements.forEach(a=>{
+        el.innerHTML+=`<div class="resource" style="color:${a.done?'#66ff88':'#999'};"><span>${a.name}</span><span>${a.done?"✔":"—"}</span></div>`;
     });
 }
 
-/* ------------------------------------------------------------
-   H. RENDER ALL
------------------------------------------------------------- */
-
-function renderAll() {
+/* RENDER ALL */
+function renderAll(){
     renderResources();
     renderFactories();
     renderResearchUI();
@@ -600,10 +418,7 @@ function renderAll() {
     renderMissionsUI();
     renderAchievementsUI();
 }
+</script>
 
-/* ------------------------------------------------------------
-   END OF ENGINE — NOW YOU CAN CLOSE THE SCRIPT TAG
------------------------------------------------------------- */
-
-<!-- OPEN SCRIPT TAG — DO NOT CLOSE YET -->
-<script>
+</body>
+</html>
