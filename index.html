@@ -270,11 +270,13 @@ function startMission(idx) {
     for (let r in m.reward) addResource(r, m.reward[r]);
     m.done = true;
     saveGame();
+}
 
 function mineOre() {
     addResource("ore", 5);  
     renderResources();      
-    saveGame();              
+    saveGame();  
+}
 
 // 7. ACHIEVEMENTS
 function checkAchievements(){ Game.achievements.forEach(a=>{ if(!a.done && a.check()) a.done=true; }); }
