@@ -107,6 +107,7 @@ button:hover { filter: brightness(1.15); }
 }
 </style>
 </head>
+
 <body>
 
 <div class="header">
@@ -152,13 +153,6 @@ button:hover { filter: brightness(1.15); }
     <h2>Achievements</h2>
     <div id="achievementList"></div>
 </div>
-
-<script>
-/* JS inserted in next message… */
-</script>
-
-</body>
-</html>
 /* ============================================================
    GALAXY INDUSTRY — CLEAN GAME ENGINE (v1.0)
    ============================================================ */
@@ -283,7 +277,7 @@ function storageUpgradeCost(resource) {
 }
 
 /* ------------------------------------------------------------
-   5. HELPER FUNCTIONS
+   5. HELPERS
 ------------------------------------------------------------ */
 
 function clamp(num) {
@@ -352,7 +346,7 @@ function startMission(idx) {
 }
 
 /* ------------------------------------------------------------
-   7. ACHIEVEMENTS CHECK
+   7. ACHIEVEMENTS
 ------------------------------------------------------------ */
 
 function checkAchievements() {
@@ -374,12 +368,10 @@ function loadGame() {
     if (!data) return;
     const obj = JSON.parse(data);
 
-    // Deep merge (safe)
     Object.assign(Game.resources, obj.resources || {});
     Object.assign(Game.storage, obj.storage || {});
     Object.assign(Game.factories, obj.factories || {});
     Object.assign(Game.research, obj.research || {});
-
     Game.missions = obj.missions || Game.missions;
     Game.achievements = obj.achievements || Game.achievements;
 }
@@ -396,20 +388,21 @@ function gameLoop() {
 
     // Factory Production
     for (let id in FactoryTypes) {
-        const count = Game.factories[id];
+        let count = Game.factories[id];
         if (count > 0) {
-            FactoryTypes[id].produce(dt, count * (Game.research.efficiency ? 1.2 : 1));
+            let multiplier = Game.research.efficiency ? 1.2 : 1;
+            FactoryTypes[id].produce(dt, count * multiplier);
         }
     }
 
-    // Automatic Research Bonuses
+    // Automatic resource generation
     if (Game.research.autoMine) addResource("ore", dt * 0.4);
     if (Game.research.autoEnergy) addResource("energy", dt * 0.4);
 
     // Achievements
     checkAchievements();
 
-    // UI Throttle (only update every ~100ms)
+    // UI Update Limit (10 per second)
     Game.uiThrottle += dt;
     if (Game.uiThrottle >= 0.1) {
         renderAll();
@@ -421,10 +414,10 @@ function gameLoop() {
 requestAnimationFrame(gameLoop);
 
 /* ------------------------------------------------------------
-   PART 3 (RENDERING) COMES NEXT…
+   PART 3 COMES NEXT — DO NOT CLOSE SCRIPT TAG YET
 ------------------------------------------------------------ */
 /* ============================================================
-   PART 3 — UI RENDERING
+   PART 3 — UI RENDERING + TAB SYSTEM
    ============================================================ */
 
 /* ------------------------------------------------------------
@@ -523,7 +516,7 @@ function renderResearchUI() {
 }
 
 /* ------------------------------------------------------------
-   E. STORAGE
+   E. STORAGE UPGRADES
 ------------------------------------------------------------ */
 
 function renderStorage() {
@@ -607,3 +600,10 @@ function renderAll() {
     renderMissionsUI();
     renderAchievementsUI();
 }
+
+/* ------------------------------------------------------------
+   END OF ENGINE — NOW YOU CAN CLOSE THE SCRIPT TAG
+------------------------------------------------------------ */
+
+<!-- OPEN SCRIPT TAG — DO NOT CLOSE YET -->
+<script>
