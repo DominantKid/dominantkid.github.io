@@ -126,8 +126,10 @@ button:hover { filter: brightness(1.15); }
 
 <div id="overview" class="panel tab-panel">
     <h2>Resources</h2>
+    <button onclick="mineOre()">Mine Ore (+5 ore)</button>
     <div id="resourceList"></div>
 </div>
+
 
 <div id="factories" class="panel tab-panel" style="display:none;">
     <h2>Factories</h2>
@@ -229,11 +231,50 @@ function spend(cost){
 }
 function canAfford(cost){ for(let r in cost) if(Game.resources[r]<cost[r]) return false; return true; }
 
-// 6. GAME ACTIONS
-function buildFactory(id){ if(!canAfford(FactoryTypes[id].cost)) return; spend(FactoryTypes[id].cost); Game.factories[id]++; saveGame(); }
-function buyResearch(id){ if(Game.research[id]) return; if(!canAfford(ResearchList[id].cost)) return; spend(ResearchList[id].cost); Game.research[id]=true; saveGame(); }
-function upgradeStorage(resource){ const cost = storageUpgradeCost(resource); if(Game.resources[resource]<cost) return; Game.resources[resource]-=cost; Game.storage[resource]=Math.floor(Game.storage[resource]*1.5); saveGame(); }
-function startMission(idx){ const m=Game.missions[idx]; if(m.done || !canAfford(m.cost)) return; spend(m.cost); for(let r in m.reward) addResource(r, m.reward[r]); m.done=true; saveGame(); }
+/* ------------------------------------------------------------
+   6. GAME ACTIONS
+------------------------------------------------------------ */
+
+function buildFactory(id) {
+    const f = FactoryTypes[id];
+    if (!canAfford(f.cost)) return;
+    spend(f.cost);
+    Game.factories[id]++;
+    saveGame();
+}
+
+function buyResearch(id) {
+    if (Game.research[id]) return;
+    const r = ResearchList[id];
+    if (!canAfford(r.cost)) return;
+    spend(r.cost);
+    Game.research[id] = true;
+    saveGame();
+}
+
+function upgradeStorage(resource) {
+    const cost = storageUpgradeCost(resource);
+    if (Game.resources[resource] < cost) return;
+
+    Game.resources[resource] -= cost;
+    Game.storage[resource] = Math.floor(Game.storage[resource] * 1.5);
+    saveGame();
+}
+
+function startMission(idx) {
+    const m = Game.missions[idx];
+    if (m.done) return;
+    if (!canAfford(m.cost)) return;
+
+    spend(m.cost);
+    for (let r in m.reward) addResource(r, m.reward[r]);
+    m.done = true;
+    saveGame();
+
+function mineOre() {
+    addResource("ore", 5);  
+    renderResources();      
+    saveGame();              
 
 // 7. ACHIEVEMENTS
 function checkAchievements(){ Game.achievements.forEach(a=>{ if(!a.done && a.check()) a.done=true; }); }
