@@ -1,415 +1,83 @@
 <!DOCTYPE html>
-<html lang="en">
+<html style="width:100%;height:100%;background-color:black;">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Galaxy Industry — Engine v1.0</title>
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
 
-<style>
-:root {
-    --bg: #070d22;
-    --panel: #0f1b3a;
-    --accent: #6fb3ff;
-    --accent2: #9f70ff;
-    --text: #eaf4ff;
-    --muted: #9fb5d9;
-    --glass: rgba(255,255,255,0.05);
-}
-
-html, body {
-    margin: 0;
-    padding: 0;
-    background: linear-gradient(180deg, var(--bg), #040a18);
-    font-family: Inter, system-ui, sans-serif;
-    color: var(--text);
-}
-
-h2 { margin: 0 0 8px 0; }
-
-/* HEADER */
-.header {
-    text-align: center;
-    padding: 22px 0 10px 0;
-}
-.title {
-    font-size: 42px;
-    font-weight: 800;
-    background: linear-gradient(90deg, var(--accent), var(--accent2), #ff6cd6, var(--accent));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: flow 8s linear infinite;
-    background-size: 300%;
-}
-@keyframes flow {
-    0%{background-position:0%}
-    50%{background-position:100%}
-    100%{background-position:0%}
-}
-.subtitle {
-    color: #bcd7ff;
-    font-size: 15px;
-}
-
-/* TABS */
-.tab-bar {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin: 14px 0;
-}
-.tab {
-    padding: 10px 14px;
-    border-radius: 8px;
-    cursor: pointer;
-    background: var(--glass);
-    border: 1px solid rgba(255,255,255,0.06);
-    transition: 0.2s;
-}
-.tab.active {
-    background: linear-gradient(90deg, var(--accent), var(--accent2));
-    color: #02112a;
-    font-weight: 700;
-}
-
-/* PANELS */
-.panel {
-    background: var(--glass);
-    border: 1px solid rgba(255,255,255,0.05);
-    margin: 12px auto;
-    padding: 14px;
-    border-radius: 10px;
-    max-width: 900px;
-    box-shadow: 0 6px 20px #00000070;
-}
-
-/* Buttons */
-button {
-    background: linear-gradient(180deg, var(--accent), #4e8fe3);
-    color: #02112a;
-    border: none;
-    font-weight: 700;
-    padding: 8px 12px;
-    border-radius: 7px;
-    cursor: pointer;
-}
-button:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-}
-button:hover { filter: brightness(1.15); }
-
-/* Resource list */
-.resource {
-    display: flex;
-    justify-content: space-between;
-    padding: 5px 0;
-    border-bottom: 1px dashed rgba(255,255,255,0.04);
-}
-</style>
-</head>
-
-<body>
-
-<div class="header">
-    <div class="title">GALAXY INDUSTRY</div>
-    <div class="subtitle">Build your interstellar empire!</div>
-</div>
-
-<div class="tab-bar">
-    <div class="tab active" data-tab="overview">Overview</div>
-    <div class="tab" data-tab="factories">Factories</div>
-    <div class="tab" data-tab="research">Research</div>
-    <div class="tab" data-tab="storage">Storage</div>
-    <div class="tab" data-tab="missions">Missions</div>
-    <div class="tab" data-tab="achievements">Achievements</div>
-</div>
-
-<div id="overview" class="panel tab-panel">
-    <h2>Resources</h2>
-    <button onclick="mineOre()">Mine Ore (+5 ore)</button>
-    <div id="resourceList"></div>
-</div>
-
-
-<div id="factories" class="panel tab-panel" style="display:none;">
-    <h2>Factories</h2>
-    <div id="factoryList"></div>
-</div>
-
-<div id="research" class="panel tab-panel" style="display:none;">
-    <h2>Research</h2>
-    <div id="researchList"></div>
-</div>
-
-<div id="storage" class="panel tab-panel" style="display:none;">
-    <h2>Storage Upgrades</h2>
-    <div id="storageList"></div>
-</div>
-
-<div id="missions" class="panel tab-panel" style="display:none;">
-    <h2>Missions</h2>
-    <div id="missionList"></div>
-</div>
-
-<div id="achievements" class="panel tab-panel" style="display:none;">
-    <h2>Achievements</h2>
-    <div id="achievementList"></div>
-</div>
-
-<script>
-// ============================================================
-// GALAXY INDUSTRY — CLEAN GAME ENGINE (v1.0)
-// ============================================================
-
-// 1. GAME STATE
-const Game = {
-    resources: { ore: 0, metal: 0, energy: 0, crystal: 0, alloy: 0 },
-    storage: { ore: 1000, metal: 500, energy: 500, crystal: 250, alloy: 250 },
-    factories: { mine: 0, generator: 0, smelter: 0, crystalLab: 0, alloyForge: 0 },
-    research: { autoMine: false, autoEnergy: false, efficiency: false },
-    missions: [
-        { id: 1, name: "Asteroid Survey", cost: { ore: 50 }, reward: { crystal: 20 }, done: false },
-        { id: 2, name: "Satellite Relay", cost: { energy: 100 }, reward: { metal: 50 }, done: false }
-    ],
-    achievements: [
-        { id: "firstOre", name: "Collect 1 ore", check: () => Game.resources.ore >= 1, done: false },
-        { id: "hundredMetal", name: "Collect 100 metal", check: () => Game.resources.metal >= 100, done: false }
-    ],
-    lastTick: Date.now(),
-    uiThrottle: 0
-};
-
-// 2. FACTORY DEFINITIONS
-const FactoryTypes = {
-    mine: {
-        name: "Ore Mine",
-        cost: { ore: 10 },
-        produce(dt, n) { addResource("ore", dt * n); }
-    },
-    generator: {
-        name: "Energy Generator",
-        cost: { ore: 5 },
-        produce(dt, n) { addResource("energy", dt * n); }
-    },
-    smelter: {
-        name: "Smelter",
-        cost: { ore: 20, energy: 5 },
-        produce(dt, n) { if(spend({ ore: dt*n, energy: dt*n })) addResource("metal", dt*n); }
-    },
-    crystalLab: {
-        name: "Crystal Lab",
-        cost: { energy: 15 },
-        produce(dt, n) { if(spend({ energy: dt*n })) addResource("crystal", dt*n); }
-    },
-    alloyForge: {
-        name: "Alloy Forge",
-        cost: { metal: 20, energy: 10 },
-        produce(dt, n) { if(spend({ metal: dt*n, energy: dt*n })) addResource("alloy", dt*n); }
-    }
-};
-
-// 3. RESEARCH SYSTEM
-const ResearchList = {
-    autoMine: { name: "Automated Mining", cost: { ore: 50 } },
-    autoEnergy: { name: "Automated Energy", cost: { energy: 50 } },
-    efficiency: { name: "Resource Efficiency", cost: { metal: 100, crystal: 50 } }
-};
-
-// 4. STORAGE UPGRADE SYSTEM
-function storageUpgradeCost(resource){ return Math.floor(Game.storage[resource]*0.4); }
-
-// 5. HELPERS
-function clamp(num){ return Math.round(num*1000)/1000; }
-function addResource(type, amount){
-    amount=clamp(amount);
-    Game.resources[type] = Math.min(Game.resources[type]+amount, Game.storage[type]);
-}
-function spend(cost){
-    for(let r in cost) if(Game.resources[r]<cost[r]) return false;
-    for(let r in cost) Game.resources[r]-=cost[r];
-    return true;
-}
-function canAfford(cost){ for(let r in cost) if(Game.resources[r]<cost[r]) return false; return true; }
-
-/* ------------------------------------------------------------
-   6. GAME ACTIONS
------------------------------------------------------------- */
-
-function buildFactory(id) {
-    const f = FactoryTypes[id];
-    if (!canAfford(f.cost)) return;
-    spend(f.cost);
-    Game.factories[id]++;
-    saveGame();
-}
-
-function buyResearch(id) {
-    if (Game.research[id]) return;
-    const r = ResearchList[id];
-    if (!canAfford(r.cost)) return;
-    spend(r.cost);
-    Game.research[id] = true;
-    saveGame();
-}
-
-function upgradeStorage(resource) {
-    const cost = storageUpgradeCost(resource);
-    if (Game.resources[resource] < cost) return;
-
-    Game.resources[resource] -= cost;
-    Game.storage[resource] = Math.floor(Game.storage[resource] * 1.5);
-    saveGame();
-}
-
-function startMission(idx) {
-    const m = Game.missions[idx];
-    if (m.done) return;
-    if (!canAfford(m.cost)) return;
-
-    spend(m.cost);
-    for (let r in m.reward) addResource(r, m.reward[r]);
-    m.done = true;
-    saveGame();
-}
-
-function mineOre() {
-    addResource("ore", 5);  
-    renderResources();      
-    saveGame();  
-}
-
-// 7. ACHIEVEMENTS
-function checkAchievements(){ Game.achievements.forEach(a=>{ if(!a.done && a.check()) a.done=true; }); }
-
-// 8. SAVE / LOAD
-function saveGame(){ localStorage.setItem("galaxyIndustrySave", JSON.stringify(Game)); }
-function loadGame(){
-    const data=localStorage.getItem("galaxyIndustrySave");
-    if(!data) return;
-    const obj=JSON.parse(data);
-    Object.assign(Game.resources, obj.resources||{});
-    Object.assign(Game.storage, obj.storage||{});
-    Object.assign(Game.factories, obj.factories||{});
-    Object.assign(Game.research, obj.research||{});
-    Game.missions=obj.missions||Game.missions;
-    Game.achievements=obj.achievements||Game.achievements;
-}
-loadGame();
-
-// 9. GAME LOOP
-function gameLoop(){
-    const now=Date.now();
-    const dt=Math.min((now-Game.lastTick)/1000, 0.25);
-    Game.lastTick=now;
-
-    for(let id in FactoryTypes){
-        let count=Game.factories[id];
-        if(count>0){ let multiplier=Game.research.efficiency?1.2:1; FactoryTypes[id].produce(dt,count*multiplier); }
-    }
-
-    if(Game.research.autoMine) addResource("ore", dt*0.4);
-    if(Game.research.autoEnergy) addResource("energy", dt*0.4);
-
-    checkAchievements();
-
-    Game.uiThrottle+=dt;
-    if(Game.uiThrottle>=0.1){ renderAll(); Game.uiThrottle=0; }
-
-    requestAnimationFrame(gameLoop);
-}
-requestAnimationFrame(gameLoop);
-
-// 10. UI RENDERING + TAB SYSTEM
-document.querySelectorAll(".tab").forEach(tab=>{
-    tab.addEventListener("click",()=>{
-        document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
-        tab.classList.add("active");
-        document.querySelectorAll(".tab-panel").forEach(p=>p.style.display="none");
-        document.getElementById(tab.dataset.tab).style.display="block";
-        renderAll();
-    });
-});
-
-function renderResources(){
-    const el=document.getElementById("resourceList");
-    el.innerHTML="";
-    for(let r in Game.resources){
-        el.innerHTML+=`<div class="resource"><span>${r.toUpperCase()}</span><span>${Game.resources[r].toFixed(1)} / ${Game.storage[r]}</span></div>`;
-    }
-}
-
-function renderFactories(){
-    const el = document.getElementById("factoryList");
-    // Only render once if empty
-    if(el.innerHTML === ""){
-        for(let id in FactoryTypes){
-            const f = FactoryTypes[id];
-            el.innerHTML += `<div class="resource">
-                <div><b>${f.name}</b>
-                    <div style="font-size:12px;opacity:0.7;">Cost: ${renderCost(f.cost)}</div>
-                </div>
-                <div>
-                    x<span id="count-${id}">${Game.factories[id]}</span><br>
-                    <button id="build-${id}" onclick="buildFactory('${id}')">Build</button>
-                </div>
-            </div>`;
+        function gtag() {
+            dataLayer.push(arguments);
         }
-    }
-    // Update counts and button states
-    for(let id in FactoryTypes){
-        document.getElementById(`count-${id}`).textContent = Game.factories[id];
-        document.getElementById(`build-${id}`).disabled = !canAfford(FactoryTypes[id].cost);
-    }
-}
+        gtag('js', new Date());
+        gtag('config', 'G-');
+    </script>
+<meta charset="UTF-8">
+<meta http-equiv="origin-trial" content="ArNPSFm7gVG988ErBulTuZ21VM9sMvN4G90SgXXCOOzf2rbY0PLmI/DYkgEiEZZxC3zIqUIf3NInHkZoSvutyAIAAAB7eyJvcmlnaW4iOiJodHRwczovL2VhZ2xlcmNyYWZ0LmNvbTo0NDMiLCJmZWF0dXJlIjoiV2ViQXNzZW1ibHlKU1Byb21pc2VJbnRlZ3JhdGlvbiIsImV4cGlyeSI6MTc0NDY3NTIwMCwiaXNTdWJkb21haW4iOnRydWV9">
+<meta http-equiv="origin-trial" content="A6nEkkcO9G/wqamPSME1dPmkGL/GvlLLPuW8lI1WBBHX/LCCvJdNYA/nicSPw/9kLEqq9QVv4g0SQL/xdbU8p2oAAAB7eyJvcmlnaW4iOiJodHRwczovL2VhZ2xlcmNyYWZ0LmNvbTo0NDMiLCJmZWF0dXJlIjoiV2ViQXNzZW1ibHlKU1Byb21pc2VJbnRlZ3JhdGlvbiIsImV4cGlyeSI6MTczODEzNTMwNCwiaXNTdWJkb21haW4iOnRydWV9">
 
-function renderCost(cost){ return Object.entries(cost).map(([r,v])=>`${v} ${r}`).join(", "); }
-
-function renderResearchUI(){
-    const el=document.getElementById("researchList");
-    el.innerHTML="";
-    for(let id in ResearchList){
-        const r=ResearchList[id];
-        const done=Game.research[id];
-        const canBuy=canAfford(r.cost);
-        el.innerHTML+=`<div class="resource"><div><b>${r.name}</b><div style="font-size:12px;opacity:0.7;">${done?"Completed ✔":"Cost: "+renderCost(r.cost)}</div></div><div><button ${(!done && canBuy)?"":"disabled"} onclick="buyResearch('${id}')">${done?"Done":"Research"}</button></div></div>`;
-    }
-}
-
-function renderStorage(){
-    const el=document.getElementById("storageList");
-    el.innerHTML="";
-    for(let r in Game.storage){
-        const cost=storageUpgradeCost(r);
-        const canBuy=Game.resources[r]>=cost;
-        el.innerHTML+=`<div class="resource"><div><b>${r.toUpperCase()} Storage</b><div style="font-size:12px;opacity:0.7;">Current: ${Game.storage[r]}</div></div><div><button ${canBuy?"":"disabled"} onclick="upgradeStorage('${r}')">Upgrade (${cost} ${r})</button></div></div>`;
-    }
-}
-
-function renderMissionsUI(){
-    const el=document.getElementById("missionList");
-    el.innerHTML="";
-    Game.missions.forEach((m,i)=>{
-        const canStart=canAfford(m.cost);
-        el.innerHTML+=`<div class="resource"><div><b>${m.name}</b><div style="font-size:12px;opacity:0.7;">${m.done?"Completed ✔":"Cost: "+renderCost(m.cost)}</div></div><div><button ${(!m.done && canStart)?"":"disabled"} onclick="startMission(${i})">${m.done?"Done":"Start"}</button></div></div>`;
-    });
-}
-
-function renderAchievementsUI(){
-    const el=document.getElementById("achievementList");
-    el.innerHTML="";
-    Game.achievements.forEach(a=>{
-        el.innerHTML+=`<div class="resource" style="color:${a.done?'#66ff88':'#999'};"><span>${a.name}</span><span>${a.done?"✔":"—"}</span></div>`;
-    });
-}
-
-function renderAll(){
-    renderResources();
-    renderFactories();
-    renderResearchUI();
-    renderStorage();
-    renderMissionsUI();
-    renderAchievementsUI();
-}
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0">
+<title>Minecraft 1.12.2</title>
+<script type="text/javascript">
+window.addEventListener("load", function() {
+	if((typeof WebAssembly !== "undefined") && (typeof WebAssembly.Suspending !== "undefined")) {
+		try {
+			if("true" === window.localStorage.getItem("hideEaglerWASMAvailable")) {
+				return;
+			}
+		}catch(ex) {
+		}
+		var el = document.getElementById("eaglerWASMAvailable");
+		var chkbox = document.getElementById("eaglerWASMAvailableDontShow");
+		function handleDontShow() {
+			if(chkbox.checked) {
+				try {
+					window.localStorage.setItem("hideEaglerWASMAvailable", "true");
+				}catch(ex) {
+				}
+			}
+		}
+		el.style.display = "block";
+		document.getElementById("eaglerWASMAvailableYes").addEventListener("click", function() {
+			handleDontShow();
+			document.location.href = "https://eaglercraft.com/mc/1.12.2-wasm/";
+		});
+		document.getElementById("eaglerWASMAvailableNo").addEventListener("click", function() {
+			handleDontShow();
+			el.style.display = "none";
+		});
+	}
+});
 </script>
+<script type="text/javascript">
+window.disableUserscripts = true;
+window.__eaglercraftLoaderClient = {
+	container: "game_frame",
+	name: "Eaglercraft 1.12",
+	file: "net.peytonplayz585.eaglercraft.v1_12.client",
+	cid: "bafybeidrnchyech7b26rqhm3tayt7p6mxvl23lzd4f5mcyqda7hbrzyal4",
+	path: "",
+	download: "https://cdn.jsdelivr.net/gh/genizy/mc@main/data/1.12.2.gz",
+	dlSize: 15601341,
+	gzip: true
+};
+</script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/genizy/mc@main/shared/loader.js"></script>
+<link type="image/png" rel="shortcut icon" href="https://cdn.jsdelivr.net/gh/genizy/mc@main/shared/game.png" />
+</head>
+<body style="margin:0px;width:100%;height:100%;overflow:hidden;background-color:white;">
+<div id="eaglerWASMAvailable" style="display:none;position:absolute;left:0px;top:0px;right:0px;z-index:1000;">
+<div style="margin:auto;max-width:650px;">
+<div style="margin:20px;border:5px double black;padding:10px;background-color:white;text-align:center;font-family:sans-serif;font-size:1.2em;">
+<h3>Eaglercraft WebAssembly GC is supported on your browser, would you like to try it?</h3>
+<p>The new variant of Eaglercraft gets almost <b>2x the FPS</b>, however it may crash if your device doesn't have a lot of memory</p>
+<p>Your existing singleplayer worlds will be available</p>
+<h4><input type="checkbox" style="zoom:1.5;" id="eaglerWASMAvailableDontShow"> Do not show again</h4>
+<p><button id="eaglerWASMAvailableYes" style="zoom:1.5;">Switch to WebAssembly version</button></p>
+<p><button id="eaglerWASMAvailableNo" style="zoom:1.5;">Keep using JavaScript version</button></p>
+</div>
+</div>
+</div>
+<div id="game_frame" style="width:100%;height:100%;"></div>
 </body>
 </html>
