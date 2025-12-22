@@ -1,44 +1,112 @@
+:root {
+  --orange: #ff8c1a;
+  --orange-dark: #e67300;
+  --bg: #f9f9f9;
+  --card-bg: #ffffff;
+  --text-dark: #222;
+}
+
 * {
   box-sizing: border-box;
-  font-family: Arial, sans-serif;
 }
 
 body {
   margin: 0;
-  background: #fff;
-  color: #222;
+  font-family: "Fredoka", sans-serif;
+  background: var(--bg);
+  color: var(--text-dark);
 }
 
-header {
-  background: orange;
+/* HERO */
+.hero {
+  background: linear-gradient(135deg, var(--orange), var(--orange-dark));
   color: white;
-  padding: 20px;
+  padding: 50px 20px;
   text-align: center;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
 }
 
+.hero h1 {
+  font-size: 3rem;
+  margin: 0;
+}
+
+.hero p {
+  font-size: 1.2rem;
+  opacity: 0.95;
+}
+
+/* MAIN CONTAINER */
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+/* GRID */
 .game-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 15px;
-  padding: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 25px;
 }
 
+/* GAME CARD */
 .game-card {
-  background: white;
-  border: 2px solid orange;
-  padding: 40px 0;
-  text-align: center;
+  background: var(--card-bg);
+  border-radius: 16px;
+  padding: 15px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
   cursor: pointer;
-  transition: transform 0.2s;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.game-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(255,140,26,0.25),
+    transparent
+  );
+  opacity: 0;
+  transition: opacity 0.25s ease;
 }
 
 .game-card:hover {
-  transform: scale(1.05);
-  background: #fff3e0;
+  transform: translateY(-8px) scale(1.03);
+  box-shadow: 0 18px 40px rgba(0,0,0,0.15);
 }
 
+.game-card:hover::after {
+  opacity: 1;
+}
+
+/* THUMBNAIL */
+.game-thumb {
+  height: 130px;
+  border-radius: 12px;
+  background: linear-gradient(
+    135deg,
+    #ffb366,
+    #ff8c1a
+  );
+  margin-bottom: 15px;
+}
+
+/* TITLE */
+.game-card h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  text-align: center;
+}
+
+/* FOOTER */
 footer {
   text-align: center;
-  padding: 10px;
-  background: #f5f5f5;
+  padding: 20px;
+  color: #666;
+  font-size: 0.9rem;
 }
