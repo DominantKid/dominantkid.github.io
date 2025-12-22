@@ -1,0 +1,44 @@
+* {
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+body {
+  margin: 0;
+  background: #fff;
+  color: #222;
+}
+
+header {
+  background: orange;
+  color: white;
+  padding: 20px;
+  text-align: center;
+}
+
+.game-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 15px;
+  padding: 20px;
+}
+
+.game-card {
+  background: white;
+  border: 2px solid orange;
+  padding: 40px 0;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.game-card:hover {
+  transform: scale(1.05);
+  background: #fff3e0;
+}
+
+footer {
+  text-align: center;
+  padding: 10px;
+  background: #f5f5f5;
+}
