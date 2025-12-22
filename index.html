@@ -1,50 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Froggies Arcade</title>
-
-  <!-- Google Font -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pokémon Hub</title>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
-
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
   <header class="hero">
-    <h1>🐸 Froggies Arcade</h1>
-    <p>Instant games. No nonsense.</p>
+    <h1>Pokémon Hub</h1>
+    <p>Play your favorite Pokémon games online!</p>
   </header>
 
   <main class="container">
     <div class="game-grid">
 
+      <!-- Example Game Card with Iframe Embed -->
       <div class="game-card">
-        <div class="game-thumb"></div>
-        <h3>Space Clicker</h3>
+        <div class="game-thumb" style="background-image:url('https://via.placeholder.com/150x100?text=Pokémon+Red');"></div>
+        <h3>Pokémon Red</h3>
+        <iframe src="https://catc24.github.io/games.html#pokemon-red" frameborder="0" class="game-frame"></iframe>
       </div>
 
       <div class="game-card">
-        <div class="game-thumb"></div>
-        <h3>Retro Racer</h3>
+        <div class="game-thumb" style="background-image:url('https://via.placeholder.com/150x100?text=Pokémon+Blue');"></div>
+        <h3>Pokémon Blue</h3>
+        <iframe src="https://catc24.github.io/games.html#pokemon-blue" frameborder="0" class="game-frame"></iframe>
       </div>
 
       <div class="game-card">
-        <div class="game-thumb"></div>
-        <h3>Pixel Fighter</h3>
+        <div class="game-thumb" style="background-image:url('https://via.placeholder.com/150x100?text=Pokémon+Yellow');"></div>
+        <h3>Pokémon Yellow</h3>
+        <iframe src="https://catc24.github.io/games.html#pokemon-yellow" frameborder="0" class="game-frame"></iframe>
       </div>
 
-      <div class="game-card">
-        <div class="game-thumb"></div>
-        <h3>Frog Jumper</h3>
-      </div>
-
+      <!-- Add more games by copying a game-card -->
     </div>
   </main>
 
   <footer>
-    <p>Built by you • © 2025</p>
+    <p>Pokémon Hub • by You • © 2025</p>
   </footer>
 
   <script src="script.js"></script>
