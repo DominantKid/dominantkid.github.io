@@ -1,16 +1,17 @@
 body {
   font-family: "Comic Sans MS", cursive, sans-serif;
-  background: linear-gradient(to right, #ff9a9e, #fad0c4);
-  color: #333;
+  background: linear-gradient(to right, #FF00FF, #FFC0CB); /* magenta → pink gradient */
+  color: #800080; /* dark magenta text */
   text-align: center;
   margin: 0;
   padding: 0;
 }
 
 header {
-  background: #ffcc00;
+  background: #FF00FF; /* bright magenta header */
   padding: 30px;
-  border-bottom: 4px solid #333;
+  border-bottom: 4px solid #800080; /* dark magenta border */
+  color: #FFFFFF; /* white text for contrast */
 }
 
 nav {
@@ -19,13 +20,13 @@ nav {
 
 nav a {
   text-decoration: none;
-  color: #0066ff;
+  color: #FF69B4; /* hot pink links */
   font-weight: bold;
   margin: 0 10px;
 }
 
 nav a:hover {
-  color: #ff0000;
+  color: #C71585; /* deep magenta hover */
 }
 
 section {
@@ -33,7 +34,7 @@ section {
 }
 
 footer {
-  background: #333;
-  color: #fff;
+  background: #FF77FF; /* light magenta footer */
+  color: #800080; /* dark magenta text */
   padding: 20px;
 }
