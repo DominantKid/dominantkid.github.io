@@ -1,1 +1,102 @@
+/* Christmas Style Sheet 🎄 */
 
+/* Import a festive but readable font */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Montserrat:wght@400;600&display=swap');
+
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+
+    /* Christmas background */
+    background: linear-gradient(
+        135deg,
+        #8b0000,
+        #b30000,
+        #004d26
+    );
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    font-family: 'Montserrat', sans-serif;
+    color: #fff;
+}
+
+/* Main content container */
+body > * {
+    max-width: 800px;
+    background: rgba(0, 0, 0, 0.35);
+    padding: 40px 50px;
+    border-radius: 18px;
+
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(6px);
+}
+
+/* Headings */
+h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 3rem;
+    text-align: center;
+    margin-bottom: 10px;
+    color: #ffdddd;
+}
+
+h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    margin-top: 25px;
+    text-align: right;
+    color: #ffeaea;
+}
+
+h3 {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    font-weight: 400;
+}
+
+/* Paragraphs */
+p {
+    margin: 0;
+}
+
+/* Emphasis styling */
+strong {
+    color: #ffd700; /* gold */
+    font-weight: 700;
+}
+
+em {
+    color: #c2f0c2;
+    font-style: italic;
+}
+
+/* Subtle Christmas sparkle effect */
+body::before {
+    content: "❄ ❄ ❄ ❄ ❄ ❄ ❄";
+    position: fixed;
+    top: 15px;
+    width: 100%;
+    text-align: center;
+    font-size: 1.2rem;
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Mobile friendly */
+@media (max-width: 768px) {
+    body > * {
+        padding: 25px;
+    }
+
+    h1 {
+        font-size: 2.2rem;
+    }
+
+    h3 {
+        font-size: 1rem;
+    }
+}
