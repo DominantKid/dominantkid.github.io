@@ -1,33 +1,118 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Money Simulation</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PixelCoin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    body { margin: 0; font-family: 'Press Start 2P', monospace; background: #f7fffb; color: #3cbfa4; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+    .container { text-align: center; max-width: 600px; padding: 20px; border: 2px solid #7de2c3; box-shadow: 0 0 25px rgba(125,226,195,0.6); border-radius: 16px; animation: float 6s ease-in-out infinite; }
+    h1 { font-size: 3rem; margin-bottom: 10px; }
+    p { color: #3cbfa4; line-height: 1.6; }
+    .tagline { font-size: 1.1rem; margin-bottom: 20px; }
+    .btn { display: inline-block; margin-top: 10px; padding: 10px 20px; border: 2px solid #7de2c3; color: #3cbfa4; text-decoration: none; transition: 0.2s; border-radius: 12px; cursor: pointer; }
+    .btn:hover { background: #3cbfa4; color: #f7fffb; }
+    footer { margin-top: 25px; font-size: 0.8rem; color: #aaa; }
+    .coin { font-size: 2.5rem; margin-bottom: 10px; animation: spin 4s linear infinite; }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
+    input { padding: 10px; border-radius: 8px; border: 1px solid #7de2c3; margin: 5px; width: 80%; }
+  </style>
 </head>
 <body>
-
-  <h1>Money Simulation</h1>
-  <p>Balance: $<span id="balance">100</span></p>
-
-  <button onclick="earnMoney()">Earn $10</button>
-  <button onclick="spendMoney()">Spend $5</button>
+  <div class="container">
+    <div class="coin">🪙</div>
+    <h1>PIXELCOIN</h1>
+    <div class="tagline">A kawaii cryptocurrency simulation</div>
+    <div id="registerDiv">
+      <input id="usernameInput" placeholder="Choose a username" />
+      <button class="btn" id="registerBtn">Register</button>
+    </div>
+    <p id="balance">Balance: 0 🪙</p>
+    <input id="recipient" placeholder="Recipient username" />
+    <input id="amount" type="number" placeholder="Amount" />
+    <button class="btn" id="sendBtn">Send PixelCoins</button>
+    <button class="btn" id="workBtn">Work (Type the word!)</button>
+    <div id="workDiv" style="display:none;">
+      <p>Type this word to earn coins: <span id="workWord"></span></p>
+      <input id="workInput" />
+      <button class="btn" id="submitWork">Submit</button>
+    </div>
+    <div id="leaderboard"><h3>Leaderboard</h3><ul></ul></div>
+    <footer>
+      <p>© 2025 PixelCoin Simulation<br>This currency has no real-world value.</p>
+    </footer>
+  </div>
 
   <script>
-    let balance = 100;
+    // Simple in-browser simulation without Firebase
+    let users = {};
+    let currentUser = null;
+    const words = ['pixel','coin','mint','kawaii','flutter','sparkle'];
+    let currentWord = '';
 
-    function earnMoney() {
-      balance += 10;
+    function updateBalance(){
+      if(currentUser) document.getElementById('balance').innerText = `Balance: ${users[currentUser].balance} 🪙`;
+    }
+
+    function updateLeaderboard(){
+      const ul = document.querySelector('#leaderboard ul');
+      ul.innerHTML = '';
+      Object.keys(users).sort((a,b)=>users[b].balance - users[a].balance).forEach(u=>{
+        const li = document.createElement('li');
+        li.textContent = `${u}: ${users[u].balance} 🪙`;
+        ul.appendChild(li);
+      });
+    }
+
+    document.getElementById('registerBtn').addEventListener('click', ()=>{
+      const username = document.getElementById('usernameInput').value.trim();
+      if(!username) return;
+      if(users[username]) { alert('Username taken!'); return; }
+      users[username] = {balance: 1000};
+      currentUser = username;
+      document.getElementById('registerDiv').style.display = 'none';
       updateBalance();
-    }
+      updateLeaderboard();
+      alert(`Registered as ${username}!`);
+    });
 
-    function spendMoney() {
-      balance -= 5;
+    document.getElementById('sendBtn').addEventListener('click', ()=>{
+      const recipient = document.getElementById('recipient').value.trim();
+      const amount = parseInt(document.getElementById('amount').value);
+      if(!currentUser || !recipient || isNaN(amount) || amount <= 0) return;
+      if(!users[recipient]) { alert('Recipient not found!'); return; }
+      if(users[currentUser].balance < amount) { alert('Not enough PixelCoins!'); return; }
+      users[currentUser].balance -= amount;
+      users[recipient].balance += amount;
       updateBalance();
-    }
+      updateLeaderboard();
+      alert(`Sent ${amount} 🪙 to ${recipient}!`);
+    });
 
-    function updateBalance() {
-      document.getElementById("balance").textContent = balance;
-    }
+    document.getElementById('workBtn').addEventListener('click', ()=>{
+      if(!currentUser) return alert('Register first!');
+      document.getElementById('workDiv').style.display = 'block';
+      currentWord = words[Math.floor(Math.random()*words.length)];
+      document.getElementById('workWord').innerText = currentWord;
+    });
+
+    document.getElementById('submitWork').addEventListener('click', ()=>{
+      if(!currentUser) return alert('Register first!');
+      const input = document.getElementById('workInput').value.trim();
+      if(input === currentWord){
+        users[currentUser].balance += 50;
+        updateBalance();
+        updateLeaderboard();
+        alert('You earned 50 🪙!');
+        currentWord = words[Math.floor(Math.random()*words.length)];
+        document.getElementById('workWord').innerText = currentWord;
+        document.getElementById('workInput').value='';
+      } else {
+        alert('Wrong word! Try again.');
+      }
+    });
   </script>
-
 </body>
 </html>
