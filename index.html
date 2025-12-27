@@ -1,17 +1,33 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>My First Website</title>
+  <title>Money Simulation</title>
 </head>
 <body>
 
-  <h1>Hello, world!</h1>
-  <p>This is my first website.</p>
+  <h1>Money Simulation</h1>
+  <p>Balance: $<span id="balance">100</span></p>
 
-  <h2>About Me</h2>
-  <p>Hi! I am learning HTML and building websites.</p>
+  <button onclick="earnMoney()">Earn $10</button>
+  <button onclick="spendMoney()">Spend $5</button>
 
-  <a href="https://www.google.com">Click here to visit Google</a>
+  <script>
+    let balance = 100;
+
+    function earnMoney() {
+      balance += 10;
+      updateBalance();
+    }
+
+    function spendMoney() {
+      balance -= 5;
+      updateBalance();
+    }
+
+    function updateBalance() {
+      document.getElementById("balance").textContent = balance;
+    }
+  </script>
 
 </body>
 </html>
