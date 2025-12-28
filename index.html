@@ -5,114 +5,197 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>PixelCoin</title>
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    body { margin: 0; font-family: 'Press Start 2P', monospace; background: #f7fffb; color: #3cbfa4; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
-    .container { text-align: center; max-width: 600px; padding: 20px; border: 2px solid #7de2c3; box-shadow: 0 0 25px rgba(125,226,195,0.6); border-radius: 16px; animation: float 6s ease-in-out infinite; }
-    h1 { font-size: 3rem; margin-bottom: 10px; }
-    p { color: #3cbfa4; line-height: 1.6; }
-    .tagline { font-size: 1.1rem; margin-bottom: 20px; }
-    .btn { display: inline-block; margin-top: 10px; padding: 10px 20px; border: 2px solid #7de2c3; color: #3cbfa4; text-decoration: none; transition: 0.2s; border-radius: 12px; cursor: pointer; }
+    body { margin: 0; font-family: 'Press Start 2P', monospace; background: #e0fff7; color: #2ca68b; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+    .container { text-align: center; max-width: 700px; padding: 25px; border: 2px solid #7de2c3; box-shadow: 0 0 30px rgba(125,226,195,0.5); border-radius: 20px; background: #f0fff9; }
+    h1 { font-size: 3rem; margin-bottom: 10px; color: #2ca68b; }
+    p { line-height: 1.6; }
+    .tagline { font-size: 1.2rem; margin-bottom: 20px; color: #3cbfa4; }
+    .btn { display: inline-block; margin: 10px 5px; padding: 12px 25px; border: 2px solid #7de2c3; color: #2ca68b; text-decoration: none; transition: 0.2s; border-radius: 12px; cursor: pointer; font-weight: bold; }
     .btn:hover { background: #3cbfa4; color: #f7fffb; }
-    footer { margin-top: 25px; font-size: 0.8rem; color: #aaa; }
-    .coin { font-size: 2.5rem; margin-bottom: 10px; animation: spin 4s linear infinite; }
+    footer { margin-top: 25px; font-size: 0.8rem; color: #777; }
+    .coin { font-size: 3rem; margin-bottom: 10px; animation: spin 4s linear infinite; }
     @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-    @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
-    input { padding: 10px; border-radius: 8px; border: 1px solid #7de2c3; margin: 5px; width: 80%; }
+    input { padding: 12px; border-radius: 10px; border: 1px solid #7de2c3; margin: 5px; width: 70%; font-size: 1rem; }
+    #market, #casino, #jobs { margin-top: 25px; border-top: 1px solid #7de2c3; padding-top: 20px; }
+    #market h3, #casino h3, #jobs h3 { margin-bottom: 10px; color: #2ca68b; }
+    .allin-btn { background: #2ca68b; color: #f7fffb; border-color: #1b9b73; }
+    .allin-btn:hover { background: #1b9b73; }
+    #stockChart { margin-top: 20px; }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="coin">🪙</div>
     <h1>PIXELCOIN</h1>
-    <div class="tagline">A kawaii cryptocurrency simulation</div>
+    <div class="tagline">A kawaii cryptocurrency simulation with stock market, jobs & casino!</div>
+
     <div id="registerDiv">
       <input id="usernameInput" placeholder="Choose a username" />
       <button class="btn" id="registerBtn">Register</button>
     </div>
+
     <p id="balance">Balance: 0 🪙</p>
-    <input id="recipient" placeholder="Recipient username" />
-    <input id="amount" type="number" placeholder="Amount" />
-    <button class="btn" id="sendBtn">Send PixelCoins</button>
-    <button class="btn" id="workBtn">Work (Type the word!)</button>
-    <div id="workDiv" style="display:none;">
-      <p>Type this word to earn coins: <span id="workWord"></span></p>
-      <input id="workInput" />
-      <button class="btn" id="submitWork">Submit</button>
+
+    <div id="jobs">
+      <h3>Jobs</h3>
+      <button class="btn" id="workBtn">Typing Job</button>
+      <button class="btn" id="bankJobBtn">Bank Job</button>
+      <button class="btn" id="bonusBtn">Daily Bonus</button>
+      <div id="jobDiv" style="display:none; margin-top:10px;">
+        <p id="jobTask"></p>
+        <input id="jobInput" />
+        <button class="btn" id="submitJob">Submit</button>
+      </div>
     </div>
-    <div id="leaderboard"><h3>Leaderboard</h3><ul></ul></div>
+
+    <div id="market">
+      <h3>Stock Market</h3>
+      <p>Select Company:</p>
+      <select id="companySelect" class="btn">
+        <option value="PixelStock">PixelStock</option>
+        <option value="MintyTech">MintyTech</option>
+        <option value="KawaiiCorp">KawaiiCorp</option>
+        <option value="SparkleWorks">SparkleWorks</option>
+      </select>
+      <p>Price: <span id="stockPrice">100</span> 🪙</p>
+      <canvas id="stockChart" width="600" height="200"></canvas>
+      <input id="investAmount" type="number" placeholder="Amount to invest" />
+      <button class="btn" id="buyBtn">Invest</button>
+      <p id="stocksOwned">Stocks Owned: 0</p>
+    </div>
+
+    <div id="casino">
+      <h3>Casino</h3>
+      <input id="betAmount" type="number" placeholder="Amount to bet" />
+      <button class="btn" id="betBtn">Roll Dice</button>
+      <button class="btn allin-btn" id="allInBtn">All In</button>
+      <p id="betResult"></p>
+    </div>
+
     <footer>
       <p>© 2025 PixelCoin Simulation<br>This currency has no real-world value.</p>
     </footer>
   </div>
 
   <script>
-    // Simple in-browser simulation without Firebase
     let users = {};
     let currentUser = null;
     const words = ['pixel','coin','mint','kawaii','flutter','sparkle'];
-    let currentWord = '';
+
+    const companies = {
+      PixelStock: {price:100, base:100, history:[100]},
+      MintyTech: {price:120, base:120, history:[120]},
+      KawaiiCorp: {price:80, base:80, history:[80]},
+      SparkleWorks: {price:150, base:150, history:[150]}
+    };
+    let currentCompany = 'PixelStock';
+
+    let currentTask = '';
+    let currentTaskType = '';
 
     function updateBalance(){
       if(currentUser) document.getElementById('balance').innerText = `Balance: ${users[currentUser].balance} 🪙`;
     }
 
-    function updateLeaderboard(){
-      const ul = document.querySelector('#leaderboard ul');
-      ul.innerHTML = '';
-      Object.keys(users).sort((a,b)=>users[b].balance - users[a].balance).forEach(u=>{
-        const li = document.createElement('li');
-        li.textContent = `${u}: ${users[u].balance} 🪙`;
-        ul.appendChild(li);
-      });
+    function updateStock(){
+      for(const comp in companies){
+        let stock = companies[comp];
+        let trend = (Math.random() - 0.5); // range -0.5 to 0.5
+        let volatility = (Math.random() - 0.5); // range -0.5 to 0.5
+        let bigEvent = 1;
+        if(Math.random() < 0.02){ bigEvent = Math.random() < 0.5 ? 2.5 : 0.4; }
+        let revert = 1 + (stock.base - stock.price)/200;
+        stock.price = Math.max(0, Math.min(200, Math.round(stock.price * (1 + trend*0.1 + volatility*0.1) * bigEvent * revert)));
+        stock.history.push(stock.price);
+        if(stock.history.length > 30) stock.history.shift();
+      }
+      document.getElementById('stockPrice').innerText = companies[currentCompany].price;
+      stockChart.data.labels = companies[currentCompany].history.map((_,i)=>i+1);
+      stockChart.data.datasets[0].data = companies[currentCompany].history;
+      stockChart.update();
     }
+
+    setInterval(updateStock, 2000);
+
+    const ctx = document.getElementById('stockChart').getContext('2d');
+    const stockChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: companies[currentCompany].history.map((_,i)=>i+1),
+        datasets: [{
+          label: currentCompany,
+          data: companies[currentCompany].history,
+          borderColor: '#3cbfa4',
+          backgroundColor: 'rgba(60,191,164,0.2)',
+          fill: true,
+          tension: 0.3,
+        }]
+      },
+      options: {
+        scales: { y: { beginAtZero: true, max:200 } },
+        plugins: { legend: { display: false } }
+      }
+    });
+
+    document.getElementById('companySelect').addEventListener('change',(e)=>{
+      currentCompany = e.target.value;
+      document.getElementById('stockPrice').innerText = companies[currentCompany].price;
+      stockChart.data.datasets[0].label = currentCompany;
+      stockChart.data.labels = companies[currentCompany].history.map((_,i)=>i+1);
+      stockChart.data.datasets[0].data = companies[currentCompany].history;
+      stockChart.update();
+      document.getElementById('stocksOwned').innerText = `Stocks Owned: ${users[currentUser]?.stocks || 0}`;
+    });
 
     document.getElementById('registerBtn').addEventListener('click', ()=>{
       const username = document.getElementById('usernameInput').value.trim();
       if(!username) return;
       if(users[username]) { alert('Username taken!'); return; }
-      users[username] = {balance: 1000};
+      users[username] = {balance: 100, stocks: 0};
       currentUser = username;
       document.getElementById('registerDiv').style.display = 'none';
       updateBalance();
-      updateLeaderboard();
-      alert(`Registered as ${username}!`);
+      alert(`Registered as ${username} with $100 starting balance!`);
     });
 
-    document.getElementById('sendBtn').addEventListener('click', ()=>{
-      const recipient = document.getElementById('recipient').value.trim();
-      const amount = parseInt(document.getElementById('amount').value);
-      if(!currentUser || !recipient || isNaN(amount) || amount <= 0) return;
-      if(!users[recipient]) { alert('Recipient not found!'); return; }
-      if(users[currentUser].balance < amount) { alert('Not enough PixelCoins!'); return; }
-      users[currentUser].balance -= amount;
-      users[recipient].balance += amount;
-      updateBalance();
-      updateLeaderboard();
-      alert(`Sent ${amount} 🪙 to ${recipient}!`);
-    });
-
+    // Typing Job logic
     document.getElementById('workBtn').addEventListener('click', ()=>{
       if(!currentUser) return alert('Register first!');
-      document.getElementById('workDiv').style.display = 'block';
-      currentWord = words[Math.floor(Math.random()*words.length)];
-      document.getElementById('workWord').innerText = currentWord;
+      const word = words[Math.floor(Math.random()*words.length)];
+      currentTask = word;
+      document.getElementById('jobTask').innerText = `Type this word: ${word}`;
+      document.getElementById('jobDiv').style.display = 'block';
+      currentTaskType = 'typing';
     });
 
-    document.getElementById('submitWork').addEventListener('click', ()=>{
+    // Bank Job logic (simple addition)
+    document.getElementById('bankJobBtn').addEventListener('click', ()=>{
       if(!currentUser) return alert('Register first!');
-      const input = document.getElementById('workInput').value.trim();
-      if(input === currentWord){
-        users[currentUser].balance += 50;
-        updateBalance();
-        updateLeaderboard();
-        alert('You earned 50 🪙!');
-        currentWord = words[Math.floor(Math.random()*words.length)];
-        document.getElementById('workWord').innerText = currentWord;
-        document.getElementById('workInput').value='';
-      } else {
-        alert('Wrong word! Try again.');
-      }
+      const a = Math.floor(Math.random()*50);
+      const b = Math.floor(Math.random()*50);
+      currentTask = a + b;
+      document.getElementById('jobTask').innerText = `Solve: ${a} + ${b}`;
+      document.getElementById('jobDiv').style.display = 'block';
+      currentTaskType = 'bank';
     });
+
+    document.getElementById('submitJob').addEventListener('click', ()=>{
+      const input = parseInt(document.getElementById('jobInput').value.trim());
+      if((currentTaskType === 'typing' && document.getElementById('jobInput').value.trim() === currentTask) ||
+         (currentTaskType === 'bank' && input === currentTask)){
+        const earnings = Math.floor(Math.random()*20 + 10);
+        users[currentUser].balance += earnings;
+        updateBalance();
+        alert(`Correct! You earned ${earnings} 🪙`);
+      } else {
+        alert('Incorrect, try again!');
+      }
+      document.getElementById('jobInput').value = '';
+      document.getElementById('jobDiv').style.display = 'none';
+    });
+
   </script>
 </body>
 </html>
