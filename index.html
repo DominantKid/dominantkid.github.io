@@ -3,199 +3,295 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PixelCoin</title>
+  <title>PIXLCOIN</title>
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    body { margin: 0; font-family: 'Press Start 2P', monospace; background: #e0fff7; color: #2ca68b; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
-    .container { text-align: center; max-width: 700px; padding: 25px; border: 2px solid #7de2c3; box-shadow: 0 0 30px rgba(125,226,195,0.5); border-radius: 20px; background: #f0fff9; }
-    h1 { font-size: 3rem; margin-bottom: 10px; color: #2ca68b; }
-    p { line-height: 1.6; }
-    .tagline { font-size: 1.2rem; margin-bottom: 20px; color: #3cbfa4; }
-    .btn { display: inline-block; margin: 10px 5px; padding: 12px 25px; border: 2px solid #7de2c3; color: #2ca68b; text-decoration: none; transition: 0.2s; border-radius: 12px; cursor: pointer; font-weight: bold; }
-    .btn:hover { background: #3cbfa4; color: #f7fffb; }
-    footer { margin-top: 25px; font-size: 0.8rem; color: #777; }
-    .coin { font-size: 3rem; margin-bottom: 10px; animation: spin 4s linear infinite; }
-    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-    input { padding: 12px; border-radius: 10px; border: 1px solid #7de2c3; margin: 5px; width: 70%; font-size: 1rem; }
-    #market, #casino, #jobs { margin-top: 25px; border-top: 1px solid #7de2c3; padding-top: 20px; }
-    #market h3, #casino h3, #jobs h3 { margin-bottom: 10px; color: #2ca68b; }
-    .allin-btn { background: #2ca68b; color: #f7fffb; border-color: #1b9b73; }
-    .allin-btn:hover { background: #1b9b73; }
-    #stockChart { margin-top: 20px; }
+    body{margin:0;font-family:'Press Start 2P',monospace;min-height:100vh;display:flex;align-items:center;justify-content:center;transition:background .3s,color .3s}
+    .container{max-width:700px;padding:25px;text-align:center;border-radius:20px;border:3px solid #4dc999;box-shadow:0 0 20px rgba(0,0,0,.2)}
+    h1{font-size:3rem;margin:10px 0}
+    .tagline{font-size:1.1rem;margin-bottom:20px}
+    .btn{margin:8px;padding:12px 25px;border-radius:12px;cursor:pointer;border:2px solid #4dc999;font-family:inherit}
+    input,select{padding:10px;border-radius:10px;width:70%;margin:6px;border:2px solid #4dc999;font-family:inherit}
+    #jobs,#market,#loans{margin-top:25px;border:2px solid #4dc999;border-radius:15px;padding:15px}
+    #themeBtn{position:absolute;top:10px;right:10px;opacity:.25;cursor:pointer}
+    .avatar{width:60px;height:60px;margin-bottom:10px;border-radius:50%;border:2px solid #4dc999}
+    #avatarSwitcher{margin-top:5px;font-size:0.9rem;color:#4dc999;cursor:pointer;opacity:0.6;user-select:none}
+    #avatarSwitcher:hover{opacity:1}
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="coin">🪙</div>
-    <h1>PIXELCOIN</h1>
-    <div class="tagline">A kawaii cryptocurrency simulation with stock market, jobs & casino!</div>
+<div class="container">
+  <button id="themeBtn">🎨</button>
+  <img class="avatar" id="avatar" src="https://cdn-icons-png.flaticon.com/512/147/147144.png">
+  <div id="avatarSwitcher">Swap Avatar</div>
 
-    <div id="registerDiv">
-      <input id="usernameInput" placeholder="Choose a username" />
-      <button class="btn" id="registerBtn">Register</button>
-    </div>
+  <h1>PIXLCOIN</h1>
+  <div class="tagline">cute fake crypto simulation</div>
 
-    <p id="balance">Balance: 0 🪙</p>
-
-    <div id="jobs">
-      <h3>Jobs</h3>
-      <button class="btn" id="workBtn">Typing Job</button>
-      <button class="btn" id="bankJobBtn">Bank Job</button>
-      <button class="btn" id="bonusBtn">Daily Bonus</button>
-      <div id="jobDiv" style="display:none; margin-top:10px;">
-        <p id="jobTask"></p>
-        <input id="jobInput" />
-        <button class="btn" id="submitJob">Submit</button>
-      </div>
-    </div>
-
-    <div id="market">
-      <h3>Stock Market</h3>
-      <p>Select Company:</p>
-      <select id="companySelect" class="btn">
-        <option value="PixelStock">PixelStock</option>
-        <option value="MintyTech">MintyTech</option>
-        <option value="KawaiiCorp">KawaiiCorp</option>
-        <option value="SparkleWorks">SparkleWorks</option>
-      </select>
-      <p>Price: <span id="stockPrice">100</span> 🪙</p>
-      <canvas id="stockChart" width="600" height="200"></canvas>
-      <input id="investAmount" type="number" placeholder="Amount to invest" />
-      <button class="btn" id="buyBtn">Invest</button>
-      <p id="stocksOwned">Stocks Owned: 0</p>
-    </div>
-
-    <div id="casino">
-      <h3>Casino</h3>
-      <input id="betAmount" type="number" placeholder="Amount to bet" />
-      <button class="btn" id="betBtn">Roll Dice</button>
-      <button class="btn allin-btn" id="allInBtn">All In</button>
-      <p id="betResult"></p>
-    </div>
-
-    <footer>
-      <p>© 2025 PixelCoin Simulation<br>This currency has no real-world value.</p>
-    </footer>
+  <div id="registerDiv">
+    <input id="usernameInput" placeholder="Username" />
+    <button class="btn" id="registerBtn">Register</button>
   </div>
 
-  <script>
-    let users = {};
-    let currentUser = null;
-    const words = ['pixel','coin','mint','kawaii','flutter','sparkle'];
+  <p id="balance">Balance: 10 🪙</p>
 
-    const companies = {
-      PixelStock: {price:100, base:100, history:[100]},
-      MintyTech: {price:120, base:120, history:[120]},
-      KawaiiCorp: {price:80, base:80, history:[80]},
-      SparkleWorks: {price:150, base:150, history:[150]}
-    };
-    let currentCompany = 'PixelStock';
+  <div id="jobs">
+    <h3>Jobs</h3>
+    <button class="btn" id="workBtn">Typing Job</button>
+    <div id="jobDiv" style="display:none">
+      <p id="jobTask"></p>
+      <input id="jobInput" />
+      <button class="btn" id="submitJob">Submit</button>
+    </div>
+  </div>
 
-    let currentTask = '';
-    let currentTaskType = '';
+  <div id="market">
+    <h3>Stock Market</h3>
+    <select id="stockSelect"></select>
+    <p>Price: <span id="stockPrice">100</span> 🪙</p>
+    <p id="marketNews"></p>
+    <canvas id="stockChart" width="600" height="200"></canvas>
+    <input id="investAmount" type="number" placeholder="Shares" />
+    <button class="btn" id="buyBtn">Buy</button>
+    <button class="btn" id="sellBtn">Sell</button>
+    <p id="stocksOwned">Stocks Owned: 0</p>
+  </div>
 
-    function updateBalance(){
-      if(currentUser) document.getElementById('balance').innerText = `Balance: ${users[currentUser].balance} 🪙`;
+  <div id="loans">
+    <h3>Loans</h3>
+    <input id="loanAmount" type="number" placeholder="Amount" />
+    <button class="btn" id="borrowBtn">Borrow</button>
+    <button class="btn" id="repayBtn">Repay</button>
+    <p id="loanBalance">Loan: 0 🪙</p>
+  </div>
+
+  <div id="ads" style="margin-top:25px;border:2px dashed #4dc999;border-radius:15px;padding:15px;opacity:.9">
+    <h3>📢 Sponsored Ads</h3>
+    <p style="font-size:0.7rem">this space is totally not biased</p>
+    <div id="adContent" style="margin-top:10px"></div>
+  </div>
+
+  <div id="badDecisions" style="margin-top:25px;border:2px dashed #4dc999;border-radius:15px;padding:15px;opacity:.9">
+    <h3>🚫 Bad Financial Decisions</h3>
+    <p style="font-size:0.7rem">for entertainment purposes only</p>
+    <h4>🐸 KermitKoin</h4>
+    <p>Price: <span id="kermitPrice">10</span> 🪙</p>
+    <p id="kermitNews"></p>
+    <input id="kermitAmount" type="number" placeholder="Shares (max 50)" />
+    <button class="btn" id="buyKermit">Buy</button>
+    <button class="btn" id="sellKermit">Sell</button>
+    <p id="kermitOwned">Owned: 0</p>
+  </div>
+
+  <button class="btn" id="resetBtn">Reset Game</button>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const users = {};
+  let currentUser = null;
+
+  const stocks = {
+    PIXL:{price:100,owned:0,history:[]},
+    MINT:{price:100,owned:0,history:[]},
+    BYTE:{price:100,owned:0,history:[]},
+    GIGA:{price:100,owned:0,history:[]}
+  };
+
+  const kermit = { price:10, owned:0, history:[] };
+  let currentStock = 'PIXL';
+
+  const balanceEl = document.getElementById('balance');
+  const stocksOwnedEl = document.getElementById('stocksOwned');
+  const loanBalanceEl = document.getElementById('loanBalance');
+  const stockPriceEl = document.getElementById('stockPrice');
+  const stockSelect = document.getElementById('stockSelect');
+  const marketNews = document.getElementById('marketNews');
+  const investAmount = document.getElementById('investAmount');
+  const kermitPriceEl = document.getElementById('kermitPrice');
+  const kermitOwnedEl = document.getElementById('kermitOwned');
+  const kermitNews = document.getElementById('kermitNews');
+  const kermitAmount = document.getElementById('kermitAmount');
+  const adContent = document.getElementById('adContent');
+
+  const adsList = [
+    '🐸 KermitKoin — The future of bad decisions',
+    'PIXL — Invest in pixel power',
+    'MINT — Refresh your portfolio',
+    'BYTE — Tech vibes only',
+    'GIGA — Big moves, big dreams',
+    '🐸 KermitKoin — 0 fundamentals. 100% vibes.',
+    'PIXL — Buy low, sell high!',
+    'MINT — Minty fresh profits await',
+    '🐸 KermitKoin — Meme your way to glory',
+    '🐸 KermitKoin — Because why not?',
+    '🐸 KermitKoin — Your mom won\'t approve but KermitKoin will.',
+    '🐸 KermitKoin — Financial regret has never been this cute.'
+  ];
+
+  function showRandomAd(){
+    const ad = adsList[Math.floor(Math.random()*adsList.length)];
+    adContent.textContent = ad;
+  }
+  setInterval(showRandomAd,10000);
+  showRandomAd();
+
+  Object.keys(stocks).forEach(k => {
+    const opt = document.createElement('option');
+    opt.value = k;
+    opt.textContent = k;
+    stockSelect.appendChild(opt);
+  });
+
+  stockSelect.onchange = () => {
+    currentStock = stockSelect.value;
+    updateStockUI();
+  };
+
+  document.getElementById('registerBtn').onclick = () => {
+    const name = document.getElementById('usernameInput').value.trim();
+    if(!name) return alert('Enter username');
+    users[name] = { balance:10, loan:0 };
+    currentUser = name;
+    document.getElementById('registerDiv').style.display = 'none';
+    updateUI();
+  };
+
+  function updateUI(){
+    if(!currentUser) return;
+    if(!users[currentUser]) return;
+    balanceEl.textContent = `Balance: ${users[currentUser].balance} 🪙`;
+    loanBalanceEl.textContent = `Loan: ${users[currentUser].loan} 🪙`;
+    updateStockUI();
+    kermitPriceEl.textContent = kermit.price;
+    kermitOwnedEl.textContent = `Owned: ${kermit.owned}`;
+  }
+
+  function updateStockUI(){
+    if(!currentUser || !stocks[currentStock]) return;
+    const s = stocks[currentStock];
+    stockPriceEl.textContent = s.price;
+    stocksOwnedEl.textContent = `Stocks Owned: ${s.owned}`;
+  }
+
+  const words = ['mint','pixel','coin','stock'];
+  let currentWord = '';
+
+  document.getElementById('workBtn').onclick = () => {
+    if(!currentUser) return alert('Register first');
+    document.getElementById('jobDiv').style.display = 'block';
+    nextWord();
+  };
+
+  function nextWord(){
+    currentWord = words[Math.floor(Math.random()*words.length)];
+    document.getElementById('jobTask').textContent = `Type: ${currentWord}`;
+    document.getElementById('jobInput').value = '';
+  }
+
+  document.getElementById('submitJob').onclick = () => {
+    if(!currentUser) return;
+    if(document.getElementById('jobInput').value === currentWord){
+      users[currentUser].balance += 5;
+      updateUI();
+      nextWord();
     }
+  };
 
-    function updateStock(){
-      for(const comp in companies){
-        let stock = companies[comp];
-        let trend = (Math.random() - 0.5); // range -0.5 to 0.5
-        let volatility = (Math.random() - 0.5); // range -0.5 to 0.5
-        let bigEvent = 1;
-        if(Math.random() < 0.02){ bigEvent = Math.random() < 0.5 ? 2.5 : 0.4; }
-        let revert = 1 + (stock.base - stock.price)/200;
-        stock.price = Math.max(0, Math.min(200, Math.round(stock.price * (1 + trend*0.1 + volatility*0.1) * bigEvent * revert)));
-        stock.history.push(stock.price);
-        if(stock.history.length > 30) stock.history.shift();
-      }
-      document.getElementById('stockPrice').innerText = companies[currentCompany].price;
-      stockChart.data.labels = companies[currentCompany].history.map((_,i)=>i+1);
-      stockChart.data.datasets[0].data = companies[currentCompany].history;
-      stockChart.update();
+  const ctx = document.getElementById('stockChart').getContext('2d');
+  const chart = new Chart(ctx,{type:'line',data:{labels:[],datasets:[{data:[],borderWidth:2}]},options:{plugins:{legend:{display:false}},scales:{x:{display:false}}}});
+
+  function tickMarket(){
+    Object.values(stocks).forEach(s => {
+      const noise = Math.floor(Math.random()*21)-10;
+      s.price = Math.max(0, Math.min(200, s.price + noise));
+      s.history.push(s.price);
+      if(s.history.length > 30) s.history.shift();
+    });
+    const active = stocks[currentStock];
+    chart.data.labels = active.history.map(()=> '');
+    chart.data.datasets[0].data = active.history;
+    chart.update();
+    stockPriceEl.textContent = active.price;
+  }
+  setInterval(tickMarket,3000);
+
+  setInterval(() => {
+    let change = Math.floor(Math.random()*5)-2;
+    if(Math.random() < 0.35){
+      const hype = Math.random() > 0.5;
+      change += hype ? Math.floor(Math.random()*10) : -Math.floor(Math.random()*5);
+      kermitNews.textContent = hype ? '🐸 KermitKoin is trending for no reason' : '🐸 Frog twitter is fighting again';
     }
+    kermit.price = Math.max(1, Math.min(20, kermit.price + change));
+    kermitPriceEl.textContent = kermit.price;
+  },2500);
 
-    setInterval(updateStock, 2000);
+  document.getElementById('buyBtn').onclick = () => {
+    if(!currentUser || !users[currentUser]) return alert('Register first');
+    const amt = Number(investAmount.value);
+    const s = stocks[currentStock];
+    const cost = amt * s.price;
+    if(amt <= 0 || users[currentUser].balance < cost) return;
+    users[currentUser].balance -= cost;
+    s.owned += amt;
+    updateUI();
+  };
 
-    const ctx = document.getElementById('stockChart').getContext('2d');
-    const stockChart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: companies[currentCompany].history.map((_,i)=>i+1),
-        datasets: [{
-          label: currentCompany,
-          data: companies[currentCompany].history,
-          borderColor: '#3cbfa4',
-          backgroundColor: 'rgba(60,191,164,0.2)',
-          fill: true,
-          tension: 0.3,
-        }]
-      },
-      options: {
-        scales: { y: { beginAtZero: true, max:200 } },
-        plugins: { legend: { display: false } }
-      }
-    });
+  document.getElementById('sellBtn').onclick = () => {
+    if(!currentUser || !users[currentUser]) return;
+    const amt = Number(investAmount.value);
+    const s = stocks[currentStock];
+    if(amt > 0 && s.owned >= amt){
+      s.owned -= amt;
+      users[currentUser].balance += amt * s.price;
+      updateUI();
+    }
+  };
 
-    document.getElementById('companySelect').addEventListener('change',(e)=>{
-      currentCompany = e.target.value;
-      document.getElementById('stockPrice').innerText = companies[currentCompany].price;
-      stockChart.data.datasets[0].label = currentCompany;
-      stockChart.data.labels = companies[currentCompany].history.map((_,i)=>i+1);
-      stockChart.data.datasets[0].data = companies[currentCompany].history;
-      stockChart.update();
-      document.getElementById('stocksOwned').innerText = `Stocks Owned: ${users[currentUser]?.stocks || 0}`;
-    });
+  document.getElementById('borrowBtn').onclick = () => {
+    if(!currentUser || !users[currentUser]) return;
+    const amt = Number(document.getElementById('loanAmount').value);
+    if(amt > 0){
+      users[currentUser].loan += amt;
+      users[currentUser].balance += amt;
+      updateUI();
+    }
+  };
 
-    document.getElementById('registerBtn').addEventListener('click', ()=>{
-      const username = document.getElementById('usernameInput').value.trim();
-      if(!username) return;
-      if(users[username]) { alert('Username taken!'); return; }
-      users[username] = {balance: 100, stocks: 0};
-      currentUser = username;
-      document.getElementById('registerDiv').style.display = 'none';
-      updateBalance();
-      alert(`Registered as ${username} with $100 starting balance!`);
-    });
+  document.getElementById('repayBtn').onclick = () => {
+    if(!currentUser || !users[currentUser]) return;
+    const pay = Math.min(users[currentUser].balance, users[currentUser].loan);
+    users[currentUser].balance -= pay;
+    users[currentUser].loan -= pay;
+    updateUI();
+  };
 
-    // Typing Job logic
-    document.getElementById('workBtn').addEventListener('click', ()=>{
-      if(!currentUser) return alert('Register first!');
-      const word = words[Math.floor(Math.random()*words.length)];
-      currentTask = word;
-      document.getElementById('jobTask').innerText = `Type this word: ${word}`;
-      document.getElementById('jobDiv').style.display = 'block';
-      currentTaskType = 'typing';
-    });
+  document.getElementById('buyKermit').onclick = () => {
+    if(!currentUser || !users[currentUser]) return;
+    const amt = Number(kermitAmount.value);
+    const cost = amt * kermit.price;
+    if(amt <= 0 || amt > 50 || users[currentUser].balance < cost) return;
+    users[currentUser].balance -= cost;
+    kermit.owned += amt;
+    updateUI();
+  };
 
-    // Bank Job logic (simple addition)
-    document.getElementById('bankJobBtn').addEventListener('click', ()=>{
-      if(!currentUser) return alert('Register first!');
-      const a = Math.floor(Math.random()*50);
-      const b = Math.floor(Math.random()*50);
-      currentTask = a + b;
-      document.getElementById('jobTask').innerText = `Solve: ${a} + ${b}`;
-      document.getElementById('jobDiv').style.display = 'block';
-      currentTaskType = 'bank';
-    });
+  document.getElementById('sellKermit').onclick = () => {
+    if(!currentUser || !users[currentUser]) return;
+    const amt = Number(kermitAmount.value);
+    if(amt > 0 && kermit.owned >= amt){
+      kermit.owned -= amt;
+      users[currentUser].balance += amt * kermit.price;
+      updateUI();
+    }
+  };
 
-    document.getElementById('submitJob').addEventListener('click', ()=>{
-      const input = parseInt(document.getElementById('jobInput').value.trim());
-      if((currentTaskType === 'typing' && document.getElementById('jobInput').value.trim() === currentTask) ||
-         (currentTaskType === 'bank' && input === currentTask)){
-        const earnings = Math.floor(Math.random()*20 + 10);
-        users[currentUser].balance += earnings;
-        updateBalance();
-        alert(`Correct! You earned ${earnings} 🪙`);
-      } else {
-        alert('Incorrect, try again!');
-      }
-      document.getElementById('jobInput').value = '';
-      document.getElementById('jobDiv').style.display = 'none';
-    });
-
-  </script>
+  document.getElementById('resetBtn').onclick = () => {
+    location.reload();
+  };
+});
+</script>
 </body>
 </html>
