@@ -1,297 +1,167 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PIXLCOIN</title>
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    body{margin:0;font-family:'Press Start 2P',monospace;min-height:100vh;display:flex;align-items:center;justify-content:center;transition:background .3s,color .3s}
-    .container{max-width:700px;padding:25px;text-align:center;border-radius:20px;border:3px solid #4dc999;box-shadow:0 0 20px rgba(0,0,0,.2)}
-    h1{font-size:3rem;margin:10px 0}
-    .tagline{font-size:1.1rem;margin-bottom:20px}
-    .btn{margin:8px;padding:12px 25px;border-radius:12px;cursor:pointer;border:2px solid #4dc999;font-family:inherit}
-    input,select{padding:10px;border-radius:10px;width:70%;margin:6px;border:2px solid #4dc999;font-family:inherit}
-    #jobs,#market,#loans{margin-top:25px;border:2px solid #4dc999;border-radius:15px;padding:15px}
-    #themeBtn{position:absolute;top:10px;right:10px;opacity:.25;cursor:pointer}
-    .avatar{width:60px;height:60px;margin-bottom:10px;border-radius:50%;border:2px solid #4dc999}
-    #avatarSwitcher{margin-top:5px;font-size:0.9rem;color:#4dc999;cursor:pointer;opacity:0.6;user-select:none}
-    #avatarSwitcher:hover{opacity:1}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trust No One – Multiplayer Proto</title>
+<style>
+  body { font-family: Arial, sans-serif; background: #111; color: #eee; padding: 20px; }
+  input, button { padding: 6px; margin: 6px; }
+  .company { background: #222; padding: 10px; margin: 5px 0; }
+</style>
 </head>
 <body>
-<div class="container">
-  <button id="themeBtn">🎨</button>
-  <img class="avatar" id="avatar" src="https://cdn-icons-png.flaticon.com/512/147/147144.png">
-  <div id="avatarSwitcher">Swap Avatar</div>
+<h1>Trust No One – Multiplayer</h1>
 
-  <h1>PIXLCOIN</h1>
-  <div class="tagline">cute fake crypto simulation</div>
-
-  <div id="registerDiv">
-    <input id="usernameInput" placeholder="Username" />
-    <button class="btn" id="registerBtn">Register</button>
-  </div>
-
-  <p id="balance">Balance: 10 🪙</p>
-
-  <div id="jobs">
-    <h3>Jobs</h3>
-    <button class="btn" id="workBtn">Typing Job</button>
-    <div id="jobDiv" style="display:none">
-      <p id="jobTask"></p>
-      <input id="jobInput" />
-      <button class="btn" id="submitJob">Submit</button>
-    </div>
-  </div>
-
-  <div id="market">
-    <h3>Stock Market</h3>
-    <select id="stockSelect"></select>
-    <p>Price: <span id="stockPrice">100</span> 🪙</p>
-    <p id="marketNews"></p>
-    <canvas id="stockChart" width="600" height="200"></canvas>
-    <input id="investAmount" type="number" placeholder="Shares" />
-    <button class="btn" id="buyBtn">Buy</button>
-    <button class="btn" id="sellBtn">Sell</button>
-    <p id="stocksOwned">Stocks Owned: 0</p>
-  </div>
-
-  <div id="loans">
-    <h3>Loans</h3>
-    <input id="loanAmount" type="number" placeholder="Amount" />
-    <button class="btn" id="borrowBtn">Borrow</button>
-    <button class="btn" id="repayBtn">Repay</button>
-    <p id="loanBalance">Loan: 0 🪙</p>
-  </div>
-
-  <div id="ads" style="margin-top:25px;border:2px dashed #4dc999;border-radius:15px;padding:15px;opacity:.9">
-    <h3>📢 Sponsored Ads</h3>
-    <p style="font-size:0.7rem">this space is totally not biased</p>
-    <div id="adContent" style="margin-top:10px"></div>
-  </div>
-
-  <div id="badDecisions" style="margin-top:25px;border:2px dashed #4dc999;border-radius:15px;padding:15px;opacity:.9">
-    <h3>🚫 Bad Financial Decisions</h3>
-    <p style="font-size:0.7rem">for entertainment purposes only</p>
-    <h4>🐸 KermitKoin</h4>
-    <p>Price: <span id="kermitPrice">10</span> 🪙</p>
-    <p id="kermitNews"></p>
-    <input id="kermitAmount" type="number" placeholder="Shares (max 50)" />
-    <button class="btn" id="buyKermit">Buy</button>
-    <button class="btn" id="sellKermit">Sell</button>
-    <p id="kermitOwned">Owned: 0</p>
-  </div>
-
-  <button class="btn" id="resetBtn">Reset Game</button>
+<!-- LOGIN / REGISTER SCREEN -->
+<div id="loginDiv">
+  <h2>Login or Register</h2>
+  <input type="text" id="usernameInput" placeholder="Your username">
+  <br>
+  <input type="password" id="passwordInput" placeholder="Password">
+  <br>
+  <button onclick="loginOrRegister()">Login / Register</button>
 </div>
 
+<!-- HOME SCREEN -->
+<div id="homeDiv" style="display:none;">
+  <h2>Home</h2>
+  <p>Logged in as <b><span id="userName"></span></b></p>
+  <button onclick="enterGame()">Enter Company</button>
+  <button onclick="logout()">Log Out</button>
+</div>
+
+<!-- GAME SCREEN -->
+<div id="gameDiv" style="display:none;">
+  <h2>Your Company</h2>
+  <input type="text" id="companyName" placeholder="Company name">
+  <br>
+  <input type="password" id="companyPassword" placeholder="Set a company password">
+  <br>
+  <button onclick="createCompany()">Create Company</button>
+  <h3>Your Money: $<span id="yourMoney">0</span></h3>
+  <h3>All Companies</h3>
+  <div id="companyList"></div>
+  <br>
+  <button onclick="goHome()">Back</button>
+</div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-  const users = {};
-  let currentUser = null;
+// Firebase config
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+  databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT_ID.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
 
-  const stocks = {
-    PIXL:{price:100,owned:0,history:[]},
-    MINT:{price:100,owned:0,history:[]},
-    BYTE:{price:100,owned:0,history:[]},
-    GIGA:{price:100,owned:0,history:[]}
-  };
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
 
-  const kermit = { price:10, owned:0, history:[] };
-  let currentStock = 'PIXL';
+let currentUser = null;
+let currentCompany = null;
 
-  const balanceEl = document.getElementById('balance');
-  const stocksOwnedEl = document.getElementById('stocksOwned');
-  const loanBalanceEl = document.getElementById('loanBalance');
-  const stockPriceEl = document.getElementById('stockPrice');
-  const stockSelect = document.getElementById('stockSelect');
-  const marketNews = document.getElementById('marketNews');
-  const investAmount = document.getElementById('investAmount');
-  const kermitPriceEl = document.getElementById('kermitPrice');
-  const kermitOwnedEl = document.getElementById('kermitOwned');
-  const kermitNews = document.getElementById('kermitNews');
-  const kermitAmount = document.getElementById('kermitAmount');
-  const adContent = document.getElementById('adContent');
-
-  const adsList = [
-    '🐸 KermitKoin — The future of bad decisions',
-    'PIXL — Invest in pixel power',
-    'MINT — Refresh your portfolio',
-    'BYTE — Tech vibes only',
-    'GIGA — Big moves, big dreams',
-    '🐸 KermitKoin — 0 fundamentals. 100% vibes.',
-    'PIXL — Buy low, sell high!',
-    'MINT — Minty fresh profits await',
-    '🐸 KermitKoin — Meme your way to glory',
-    '🐸 KermitKoin — Because why not?',
-    '🐸 KermitKoin — Your mom won\'t approve but KermitKoin will.',
-    '🐸 KermitKoin — Financial regret has never been this cute.'
-  ];
-
-  function showRandomAd(){
-    const ad = adsList[Math.floor(Math.random()*adsList.length)];
-    adContent.textContent = ad;
+window.onload = () => {
+  const savedUser = localStorage.getItem('tno_user');
+  const savedPass = localStorage.getItem('tno_pass');
+  if (savedUser && savedPass) {
+    currentUser = savedUser;
+    showHome();
   }
-  setInterval(showRandomAd,10000);
-  showRandomAd();
+};
 
-  Object.keys(stocks).forEach(k => {
-    const opt = document.createElement('option');
-    opt.value = k;
-    opt.textContent = k;
-    stockSelect.appendChild(opt);
-  });
+function loginOrRegister() {
+  const name = document.getElementById('usernameInput').value.trim();
+  const password = document.getElementById('passwordInput').value;
+  if (!name || !password) { alert('Enter both username and password'); return; }
 
-  stockSelect.onchange = () => {
-    currentStock = stockSelect.value;
-    updateStockUI();
-  };
-
-  document.getElementById('registerBtn').onclick = () => {
-    const name = document.getElementById('usernameInput').value.trim();
-    if(!name) return alert('Enter username');
-    users[name] = { balance:10, loan:0 };
-    currentUser = name;
-    document.getElementById('registerDiv').style.display = 'none';
-    updateUI();
-  };
-
-  function updateUI(){
-    if(!currentUser) return;
-    if(!users[currentUser]) return;
-    balanceEl.textContent = `Balance: ${users[currentUser].balance} 🪙`;
-    loanBalanceEl.textContent = `Loan: ${users[currentUser].loan} 🪙`;
-    updateStockUI();
-    kermitPriceEl.textContent = kermit.price;
-    kermitOwnedEl.textContent = `Owned: ${kermit.owned}`;
+  const storedPass = localStorage.getItem('tno_pass_' + name);
+  if (storedPass && storedPass !== password) {
+    alert('Incorrect password');
+    return;
+  } else if (!storedPass) {
+    localStorage.setItem('tno_pass_' + name, password);
   }
 
-  function updateStockUI(){
-    if(!currentUser || !stocks[currentStock]) return;
-    const s = stocks[currentStock];
-    stockPriceEl.textContent = s.price;
-    stocksOwnedEl.textContent = `Stocks Owned: ${s.owned}`;
-  }
+  currentUser = name;
+  localStorage.setItem('tno_user', name);
+  localStorage.setItem('tno_pass', password);
+  showHome();
+}
 
-  const words = ['mint','pixel','coin','stock'];
-  let currentWord = '';
+function logout() {
+  localStorage.removeItem('tno_user');
+  localStorage.removeItem('tno_pass');
+  currentUser = null;
+  currentCompany = null;
+  hideAll();
+  document.getElementById('loginDiv').style.display = 'block';
+}
 
-  document.getElementById('workBtn').onclick = () => {
-    if(!currentUser) return alert('Register first');
-    document.getElementById('jobDiv').style.display = 'block';
-    nextWord();
-  };
+function showHome() {
+  hideAll();
+  document.getElementById('homeDiv').style.display = 'block';
+  document.getElementById('userName').textContent = currentUser;
+}
 
-  function nextWord(){
-    currentWord = words[Math.floor(Math.random()*words.length)];
-    document.getElementById('jobTask').textContent = `Type: ${currentWord}`;
-    document.getElementById('jobInput').value = '';
-  }
+function enterGame() {
+  hideAll();
+  document.getElementById('gameDiv').style.display = 'block';
+  loadCompanies();
+  loadCurrentCompany();
+}
 
-  document.getElementById('submitJob').onclick = () => {
-    if(!currentUser) return;
-    if(document.getElementById('jobInput').value === currentWord){
-      users[currentUser].balance += 5;
-      updateUI();
-      nextWord();
-    }
-  };
+function goHome() { showHome(); }
+function hideAll() {
+  document.getElementById('loginDiv').style.display = 'none';
+  document.getElementById('homeDiv').style.display = 'none';
+  document.getElementById('gameDiv').style.display = 'none';
+}
 
-  const ctx = document.getElementById('stockChart').getContext('2d');
-  const chart = new Chart(ctx,{type:'line',data:{labels:[],datasets:[{data:[],borderWidth:2}]},options:{plugins:{legend:{display:false}},scales:{x:{display:false}}}});
+// Firebase based company functions
+function createCompany() {
+  const name = document.getElementById('companyName').value.trim();
+  const password = document.getElementById('companyPassword').value;
+  if (!name || !password) { alert('Enter company name and password'); return; }
 
-  function tickMarket(){
-    Object.values(stocks).forEach(s => {
-      const noise = Math.floor(Math.random()*21)-10;
-      s.price = Math.max(0, Math.min(200, s.price + noise));
-      s.history.push(s.price);
-      if(s.history.length > 30) s.history.shift();
+  currentCompany = { owner: currentUser, name: name, money: 100, guards: 0, password: password };
+  db.ref('companies/' + currentUser).set(currentCompany);
+  updateMoney();
+}
+
+function loadCompanies() {
+  const list = document.getElementById('companyList');
+  list.innerHTML = '';
+  db.ref('companies').on('value', snapshot => {
+    const companies = snapshot.val() || {};
+    list.innerHTML = '';
+    Object.values(companies).forEach(c => {
+      const div = document.createElement('div');
+      div.className = 'company';
+      div.textContent = `${c.name} — owned by ${c.owner} ($${c.money})`;
+      list.appendChild(div);
     });
-    const active = stocks[currentStock];
-    chart.data.labels = active.history.map(()=> '');
-    chart.data.datasets[0].data = active.history;
-    chart.update();
-    stockPriceEl.textContent = active.price;
-  }
-  setInterval(tickMarket,3000);
+  });
+}
 
-  setInterval(() => {
-    let change = Math.floor(Math.random()*5)-2;
-    if(Math.random() < 0.35){
-      const hype = Math.random() > 0.5;
-      change += hype ? Math.floor(Math.random()*10) : -Math.floor(Math.random()*5);
-      kermitNews.textContent = hype ? '🐸 KermitKoin is trending for no reason' : '🐸 Frog twitter is fighting again';
-    }
-    kermit.price = Math.max(1, Math.min(20, kermit.price + change));
-    kermitPriceEl.textContent = kermit.price;
-  },2500);
+function loadCurrentCompany() {
+  if (!currentUser) return;
+  db.ref('companies/' + currentUser).on('value', snapshot => {
+    currentCompany = snapshot.val();
+    updateMoney();
+  });
+}
 
-  document.getElementById('buyBtn').onclick = () => {
-    if(!currentUser || !users[currentUser]) return alert('Register first');
-    const amt = Number(investAmount.value);
-    const s = stocks[currentStock];
-    const cost = amt * s.price;
-    if(amt <= 0 || users[currentUser].balance < cost) return;
-    users[currentUser].balance -= cost;
-    s.owned += amt;
-    updateUI();
-  };
-
-  document.getElementById('sellBtn').onclick = () => {
-    if(!currentUser || !users[currentUser]) return;
-    const amt = Number(investAmount.value);
-    const s = stocks[currentStock];
-    if(amt > 0 && s.owned >= amt){
-      s.owned -= amt;
-      users[currentUser].balance += amt * s.price;
-      updateUI();
-    }
-  };
-
-  document.getElementById('borrowBtn').onclick = () => {
-    if(!currentUser || !users[currentUser]) return;
-    const amt = Number(document.getElementById('loanAmount').value);
-    if(amt > 0){
-      users[currentUser].loan += amt;
-      users[currentUser].balance += amt;
-      updateUI();
-    }
-  };
-
-  document.getElementById('repayBtn').onclick = () => {
-    if(!currentUser || !users[currentUser]) return;
-    const pay = Math.min(users[currentUser].balance, users[currentUser].loan);
-    users[currentUser].balance -= pay;
-    users[currentUser].loan -= pay;
-    updateUI();
-  };
-
-  document.getElementById('buyKermit').onclick = () => {
-    if(!currentUser || !users[currentUser]) return;
-    const amt = Number(kermitAmount.value);
-    const cost = amt * kermit.price;
-    if(amt <= 0 || amt > 50 || users[currentUser].balance < cost) return;
-    users[currentUser].balance -= cost;
-    kermit.owned += amt;
-    updateUI();
-  };
-
-  document.getElementById('sellKermit').onclick = () => {
-    if(!currentUser || !users[currentUser]) return;
-    const amt = Number(kermitAmount.value);
-    if(amt > 0 && kermit.owned >= amt){
-      kermit.owned -= amt;
-      users[currentUser].balance += amt * kermit.price;
-      updateUI();
-    }
-  };
-
-  document.getElementById('resetBtn').onclick = () => {
-    location.reload();
-  };
-});
+function updateMoney() {
+  document.getElementById('yourMoney').textContent = currentCompany ? currentCompany.money : 0;
+}
 </script>
 </body>
 </html>
