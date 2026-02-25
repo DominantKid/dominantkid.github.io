@@ -1,1 +1,161 @@
+:root {
+  --bg: #0f1117;
+  --card: #1a1e29;
+  --muted: #9098ad;
+  --text: #f4f7ff;
+  --primary: #4f8cff;
+  --primary-hover: #3978ef;
+  --secondary: #2a3142;
+  --danger: #ff6b6b;
+  --ok: #59d190;
+}
 
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Inter, Segoe UI, Arial, sans-serif;
+  background: radial-gradient(circle at top, #1f2533 0%, var(--bg) 55%);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+.app-shell {
+  width: min(900px, 94vw);
+  margin: 2rem auto;
+}
+
+h1 {
+  margin-top: 0;
+}
+
+.card {
+  background: linear-gradient(140deg, #1d2230, #171b26);
+  border: 1px solid #2d3448;
+  border-radius: 14px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.status-banner {
+  min-height: 2rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.status-banner.ok {
+  color: var(--ok);
+}
+
+.status-banner.err {
+  color: var(--danger);
+}
+
+.muted {
+  color: var(--muted);
+}
+
+label {
+  display: block;
+  margin-bottom: 0.75rem;
+  font-size: 0.95rem;
+}
+
+input,
+button {
+  width: 100%;
+  margin-top: 0.25rem;
+  border-radius: 10px;
+  border: 1px solid #3a4258;
+  background: #131722;
+  color: var(--text);
+  padding: 0.65rem 0.8rem;
+}
+
+button {
+  cursor: pointer;
+  background: var(--primary);
+  border: none;
+  font-weight: 600;
+}
+
+button:hover {
+  background: var(--primary-hover);
+}
+
+button.secondary {
+  background: var(--secondary);
+}
+
+button.secondary:hover {
+  background: #39425a;
+}
+
+.actions-row {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin: 0.75rem 0;
+}
+
+.actions-row button {
+  flex: 1;
+  min-width: 180px;
+}
+
+.grid.two {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.stats-grid {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+
+.stat {
+  background: #131722;
+  border: 1px solid #2f3650;
+  border-radius: 12px;
+  padding: 0.75rem;
+}
+
+.stat h3,
+.stat p {
+  margin: 0;
+}
+
+.stat p {
+  margin-top: 0.3rem;
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.company-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.company {
+  background: #131722;
+  border: 1px solid #303752;
+  padding: 0.75rem;
+  border-radius: 12px;
+}
+
+.company-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+}
+
+.company-meta {
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin-top: 0.3rem;
+}
