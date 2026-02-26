@@ -8,7 +8,7 @@
 </head>
 <body>
   <main class="app-shell">
-    <h1>Trust No One – Underworld Wars</h1>
+    <h1>Trust No One – Multiplayer</h1>
 
     <section id="statusBanner" class="status-banner"></section>
 
@@ -44,44 +44,32 @@
         </label>
         <label>
           Company password
-          <input type="password" id="companyPassword" placeholder="Set company password">
+          <input type="password" id="companyPassword" placeholder="Set a company password">
         </label>
       </div>
       <div class="actions-row">
         <button id="createCompanyBtn">Create / Update Company</button>
-        <button id="dailyBonusBtn" class="secondary">Claim Daily Bonus</button>
       </div>
 
       <div class="stats-grid">
-        <article class="stat"><h3>Money</h3><p>$<span id="yourMoney">0</span></p></article>
-        <article class="stat"><h3>Guards</h3><p><span id="yourGuards">0</span></p></article>
-        <article class="stat"><h3>Operatives</h3><p><span id="yourOperatives">0</span></p></article>
-        <article class="stat"><h3>Intel</h3><p><span id="yourIntel">0</span></p></article>
-        <article class="stat"><h3>Heat</h3><p><span id="yourHeat">0</span></p></article>
-        <article class="stat"><h3>Level</h3><p><span id="yourLevel">1</span></p></article>
+        <article class="stat">
+          <h3>Money</h3>
+          <p>$<span id="yourMoney">0</span></p>
+        </article>
+        <article class="stat">
+          <h3>Guards</h3>
+          <p><span id="yourGuards">0</span></p>
+        </article>
       </div>
 
-      <h3>Operations</h3>
       <div class="actions-row">
-        <button id="collectIncomeBtn">Collect Income</button>
-        <button id="hireGuardBtn">Hire Guard (-$50)</button>
-        <button id="trainOperativeBtn">Train Operative (-$80)</button>
-        <button id="runMissionBtn">Run Mission</button>
-      </div>
-      <div class="actions-row">
-        <button id="upgradeSecurityBtn" class="secondary">Upgrade Security (-$120)</button>
-        <button id="coolDownHeatBtn" class="secondary">Lay Low (-$30, -10 heat)</button>
+        <button id="collectIncomeBtn">Collect income (+$20)</button>
+        <button id="hireGuardBtn">Hire guard (-$50)</button>
       </div>
 
-      <h3>Leaderboard</h3>
-      <div id="leaderboardList" class="company-list"></div>
-
-      <h3>Rivals</h3>
-      <p class="muted">Heists use operatives and have a cooldown. Strong security and guards make targets harder.</p>
+      <h3>All Companies</h3>
+      <p class="muted">Attempt a sabotage against another company. You need at least one guard.</p>
       <div id="companyList" class="company-list"></div>
-
-      <h3>Activity Log</h3>
-      <div id="activityLog" class="log-list"></div>
 
       <div class="actions-row">
         <button id="goHomeBtn" class="secondary">Back</button>

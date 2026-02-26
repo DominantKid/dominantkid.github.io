@@ -15,6 +15,8 @@ const LOCAL_COMPANIES_EVENT = "tno_companies_updated";
 const HEIST_COOLDOWN_MS = 60_000;
 const DAILY_COOLDOWN_MS = 12 * 60 * 60 * 1000;
 
+const LOCAL_COMPANIES_EVENT = "tno_companies_updated";
+
 const storage = {
   readCompanies() {
     return JSON.parse(localStorage.getItem("tno_companies") || "{}");
@@ -36,6 +38,19 @@ const storage = {
     return () => {
       window.removeEventListener("storage", storageHandler);
       window.removeEventListener(LOCAL_COMPANIES_EVENT, notify);
+    const notifyListener = () => listener(this.readCompanies());
+
+    const storageHandler = event => {
+      if (event.key === "tno_companies") notifyListener();
+    };
+
+    window.addEventListener("storage", storageHandler);
+    window.addEventListener(LOCAL_COMPANIES_EVENT, notifyListener);
+    notifyListener();
+
+    return () => {
+      window.removeEventListener("storage", storageHandler);
+      window.removeEventListener(LOCAL_COMPANIES_EVENT, notifyListener);
     };
   },
   setCompany(owner, payload) {
@@ -53,6 +68,16 @@ const storage = {
     const current = companies[owner];
     if (!current) return Promise.resolve(false);
     companies[owner] = updater(current);
+    const unsubscribe = this.subscribeCompanies(companies => {
+      listener(companies[owner] || null);
+    });
+    return unsubscribe;
+  },
+  updateCompany(owner, updater) {
+    const companies = this.readCompanies();
+    const company = companies[owner];
+    if (!company) return Promise.resolve(false);
+    companies[owner] = updater(company);
     this.writeCompanies(companies);
     return Promise.resolve(true);
   }
@@ -97,6 +122,8 @@ function bindEvents() {
   document.getElementById("runMissionBtn").addEventListener("click", runMission);
   document.getElementById("upgradeSecurityBtn").addEventListener("click", upgradeSecurity);
   document.getElementById("coolDownHeatBtn").addEventListener("click", layLow);
+  document.getElementById("collectIncomeBtn").addEventListener("click", collectIncome);
+  document.getElementById("hireGuardBtn").addEventListener("click", hireGuard);
   document.getElementById("goHomeBtn").addEventListener("click", showHome);
 }
 
@@ -122,9 +149,14 @@ function loginOrRegister() {
   }
   if (!storedPass) localStorage.setItem(`tno_pass_${name}`, password);
 
+  if (!storedPass) {
+    localStorage.setItem(`tno_pass_${name}`, password);
+  }
+
   currentUser = name;
   localStorage.setItem("tno_user", name);
   localStorage.setItem("tno_pass", password);
+
   notify(`Welcome, ${name}.`, "ok");
   showHome();
 }
@@ -180,12 +212,19 @@ function startGameSubscriptions() {
     document.getElementById("companyPassword").value = "";
     updateStats();
     renderLog();
+  companiesUnsubscribe = subscribeCompanies(renderCompanies);
+  companyUnsubscribe = getCompany(currentUser, company => {
+    currentCompany = company;
+    document.getElementById("companyName").value = company?.name || "";
+    document.getElementById("companyPassword").value = "";
+    updateStats();
   });
 }
 
 function createCompany() {
   const name = document.getElementById("companyName").value.trim();
   const password = document.getElementById("companyPassword").value;
+
   if (!name || !password) {
     notify("Enter company name and password.", "err");
     return;
@@ -201,6 +240,17 @@ function createCompany() {
   setCompany(currentUser, payload).then(() => {
     currentCompany = payload;
     pushLog("🏢 Company profile updated.");
+  const payload = {
+    owner: currentUser,
+    name,
+    money: currentCompany?.money ?? 100,
+    guards: currentCompany?.guards ?? 0,
+    password
+  };
+
+  setCompany(currentUser, payload).then(() => {
+    currentCompany = payload;
+    updateStats();
     notify("Company saved.", "ok");
   });
 }
@@ -387,6 +437,63 @@ function spyOnTarget(targetOwner) {
   });
 
   notify(`Intel report gathered on ${target.name}.`, "ok");
+function collectIncome() {
+  if (!currentCompany) {
+    notify("Create your company first.", "err");
+    return;
+  }
+
+  mutateMyCompany(company => ({ ...company, money: company.money + 20 }));
+  notify("Collected income (+$20).", "ok");
+}
+
+function hireGuard() {
+  if (!currentCompany) {
+    notify("Create your company first.", "err");
+    return;
+  }
+
+  if (currentCompany.money < 50) {
+    notify("Not enough money to hire a guard.", "err");
+    return;
+  }
+
+  mutateMyCompany(company => ({ ...company, money: company.money - 50, guards: company.guards + 1 }));
+  notify("Guard hired.", "ok");
+}
+
+function attemptSabotage(targetOwner) {
+  if (!currentCompany) {
+    notify("Create your company first.", "err");
+    return;
+  }
+  if (targetOwner === currentUser) {
+    notify("You cannot sabotage your own company.", "err");
+    return;
+  }
+  if (currentCompany.guards < 1) {
+    notify("You need at least 1 guard to attempt sabotage.", "err");
+    return;
+  }
+
+  const target = companiesSnapshot[targetOwner];
+  if (!target) {
+    notify("Target company not found.", "err");
+    return;
+  }
+
+  const guess = window.prompt(`Enter password for ${target.name}:`);
+  if (guess === null) return;
+
+  if (guess === target.password) {
+    const stolen = Math.min(40, Number(target.money) || 0);
+    updateCompany(targetOwner, t => ({ ...t, money: Math.max(0, t.money - stolen) }));
+    mutateMyCompany(c => ({ ...c, money: c.money + stolen }));
+    notify(`Success! You stole $${stolen}.`, "ok");
+  } else {
+    mutateMyCompany(c => ({ ...c, guards: Math.max(0, c.guards - 1) }));
+    notify("Sabotage failed. You lost 1 guard.", "err");
+  }
 }
 
 function renderCompanies(companies) {
@@ -426,6 +533,37 @@ function renderCompanies(companies) {
     actions.appendChild(heistBtn);
     actions.appendChild(spyBtn);
     div.appendChild(actions);
+  companiesSnapshot = companies || {};
+
+  const values = Object.values(companiesSnapshot);
+  if (!values.length) {
+    list.innerHTML = '<p class="muted">No companies yet.</p>';
+    return;
+  }
+
+  values.forEach(company => {
+    const div = document.createElement("div");
+    div.className = "company";
+
+    const isSelf = company.owner === currentUser;
+    const money = Number(company.money) || 0;
+    const guards = Number(company.guards) || 0;
+
+    div.innerHTML = `
+      <div class="company-header">
+        <strong>${escapeHtml(company.name)}</strong>
+        <span>$${money}</span>
+      </div>
+      <div class="company-meta">Owner: ${escapeHtml(company.owner)} | Guards: ${guards}</div>
+    `;
+
+    if (!isSelf) {
+      const btn = document.createElement("button");
+      btn.textContent = "Attempt sabotage";
+      btn.addEventListener("click", () => attemptSabotage(company.owner));
+      div.appendChild(btn);
+    }
+
     list.appendChild(div);
   });
 }
@@ -577,6 +715,19 @@ function baseCompany(owner) {
   };
 }
 
+function updateStats() {
+  document.getElementById("yourMoney").textContent = currentCompany ? currentCompany.money : 0;
+  document.getElementById("yourGuards").textContent = currentCompany ? currentCompany.guards : 0;
+}
+
+function mutateMyCompany(updater) {
+  if (!currentUser || !currentCompany) return;
+  const next = updater(currentCompany);
+  currentCompany = next;
+  updateStats();
+  return setCompany(currentUser, next);
+}
+
 function setCompany(owner, payload) {
   if (db) return db.ref(`companies/${owner}`).set(payload);
   return storage.setCompany(owner, payload);
@@ -591,6 +742,11 @@ function updateCompany(owner, updater) {
     });
   }
   return storage.updateCompany(owner, existing => updater(normalizeCompany(existing, owner)));
+      if (existing) return db.ref(`companies/${owner}`).set(updater(existing));
+      return null;
+    });
+  }
+  return storage.updateCompany(owner, updater);
 }
 
 function subscribeCompanies(listener) {
@@ -600,6 +756,7 @@ function subscribeCompanies(listener) {
     ref.on("value", callback);
     return () => ref.off("value", callback);
   }
+
   return storage.subscribeCompanies(listener);
 }
 
@@ -610,6 +767,7 @@ function getCompany(owner, listener) {
     ref.on("value", callback);
     return () => ref.off("value", callback);
   }
+
   return storage.getCompany(owner, listener);
 }
 
